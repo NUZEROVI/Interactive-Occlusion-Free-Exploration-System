@@ -14,4 +14,4 @@
 - [For Windows - VolumeVis_Program_Win_x86_64.exe](https://drive.google.com/drive/folders/1sApUv3nzVlSrI0xMHoo-4V8_G1Y6B6s8?usp=sharing)
 
 ## Acknowledgements
-I would like to express my appreciation to the original creator, [mlavik1](https://github.com/mlavik1), <br> for releasing the open source and tutorial to volume rendering,  <br> which enabled me to finish my master thesis study on volume rendering visualization.
+I would like to express my appreciation to the original author, [mlavik1](https://github.com/mlavik1), <br> for releasing the open source and tutorial to volume rendering,  <br> which enabled me to finish my master thesis study on volume rendering visualization.
