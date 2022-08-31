@@ -40,3 +40,11 @@ The following packages were added:
   com.unity.textmeshpro@2.1.6
   com.unity.timeline@1.2.18
   com.unity.ugui@1.0.0
+
+=== Wed Aug 31 14:01:36 2022
+
+Packages were changed.
+Update Mode: resetToDefaultDependencies
+
+The following packages were updated:
+  com.unity.textmeshpro from version 2.1.4 to 2.1.6
