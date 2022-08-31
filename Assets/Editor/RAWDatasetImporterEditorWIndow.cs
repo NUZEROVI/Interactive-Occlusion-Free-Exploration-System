@@ -2,6 +2,7 @@
 using UnityEditor;
 using System.IO;
 using System;
+using System.Diagnostics;
 
 namespace UnityVolumeRendering
 {
@@ -57,10 +58,20 @@ namespace UnityVolumeRendering
                     }
                 }
                 VolumeRenderedObject obj = VolumeObjectFactory.CreateObject(dataset);
+                
+                // Calculate Iso-surface Similarity
+                //Stopwatch sw = new Stopwatch();
+                //sw.Start();
+
+                //VolumeObjectFactory.CreateIsosurfacePair(dataset); // Compare Isosurface Pair
+
+                //sw.Stop();
+                //TimeSpan ts2 = sw.Elapsed;
+                //UnityEngine.Debug.Log("total time (ms) : " + ts2.TotalMilliseconds);
             }
             else
             {
-                Debug.LogError("Failed to import datset");
+                UnityEngine.Debug.LogError("Failed to import datset");
             }
 
             this.Close();

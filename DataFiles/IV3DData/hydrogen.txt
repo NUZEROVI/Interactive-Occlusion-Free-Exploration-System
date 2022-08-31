@@ -1,0 +1,9 @@
+ObjectFileName: hydrogen.dat.raw
+TaggedFileName: ---
+Resolution:     128 128 128
+SliceThickness: 1 1 1
+Format:         UCHAR
+ObjectType:     TEXTURE_VOLUME_OBJECT
+ObjectModel:    RGBA
+GridType:       EQUIDISTANT
+Endianess:      LITTLE
