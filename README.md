@@ -1,7 +1,7 @@
 # Interactive_Occlusion_Free_Exploration_System
 
 ## Interactive Interface
-<p align="center"><img src="https://github.com/NUZEROVI/Interactive_Occlusion_Free_Exploration_System/blob/only-for-survey-use/survey_use/Screenshots/VolumeVis_Interface.png"></p>
+<p align="center"><img src="https://github.com/NUZEROVI/Interactive_Occlusion_Free_Exploration_System/blob/only-for-survey-use/survey_use/Screenshots/Interface.gif"></p>
 
 
 ## Examples of system demos
