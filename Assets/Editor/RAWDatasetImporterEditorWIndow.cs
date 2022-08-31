@@ -60,14 +60,14 @@ namespace UnityVolumeRendering
                 VolumeRenderedObject obj = VolumeObjectFactory.CreateObject(dataset);
                 
                 // Calculate Iso-surface Similarity
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
+                //Stopwatch sw = new Stopwatch();
+                //sw.Start();
 
-                VolumeObjectFactory.CreateIsosurfacePair(dataset); // Compare Isosurface Pair
+                //VolumeObjectFactory.CreateIsosurfacePair(dataset); // Compare Isosurface Pair
 
-                sw.Stop();
-                TimeSpan ts2 = sw.Elapsed;
-                UnityEngine.Debug.Log("total time (ms) : " + ts2.TotalMilliseconds);
+                //sw.Stop();
+                //TimeSpan ts2 = sw.Elapsed;
+                //UnityEngine.Debug.Log("total time (ms) : " + ts2.TotalMilliseconds);
             }
             else
             {
