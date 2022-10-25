@@ -122,7 +122,7 @@ namespace UnityVolumeRendering
             }
         }
 
-        private void UpdateMaterialProperties()
+        public void UpdateMaterialProperties()
         {
             bool useGradientTexture = tfRenderMode == TFRenderMode.TF2D || renderMode == RenderMode.IsosurfaceRendering || lightingEnabled;
             meshRenderer.sharedMaterial.SetTexture("_GradientTex", useGradientTexture ? dataset.GetGradientTexture() : null);
