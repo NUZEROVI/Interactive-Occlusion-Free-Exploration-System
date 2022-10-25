@@ -133,6 +133,10 @@ namespace UnityVolumeRendering
             outerObject.transform.localScale = new Vector3((float)Math.Round((decimal)dataset.dimX / maxDim, 2), (float)Math.Round((decimal)dataset.dimY / maxDim, 2), (float)Math.Round((decimal)dataset.dimZ / maxDim, 2));
             meshContainer.AddComponent<BoxCollider>();
 
+            GameObject ShaderBuffer = new GameObject("ShaderBuffer");
+            ShaderDebugging shaderDebugObj = ShaderBuffer.AddComponent<ShaderDebugging>();
+            shaderDebugObj.target = meshContainer;
+
             outerObject.transform.localRotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
 
             MeshRenderer meshRenderer = meshContainer.GetComponent<MeshRenderer>();
