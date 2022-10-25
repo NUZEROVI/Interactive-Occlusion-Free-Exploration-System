@@ -133,6 +133,8 @@ namespace UnityVolumeRendering
             outerObject.transform.localScale = new Vector3((float)Math.Round((decimal)dataset.dimX / maxDim, 2), (float)Math.Round((decimal)dataset.dimY / maxDim, 2), (float)Math.Round((decimal)dataset.dimZ / maxDim, 2));
             meshContainer.AddComponent<BoxCollider>();
 
+            meshContainer.AddComponent<Hover>(); // Interactive Control
+
             GameObject ShaderBuffer = new GameObject("ShaderBuffer");
             ShaderDebugging shaderDebugObj = ShaderBuffer.AddComponent<ShaderDebugging>();
             shaderDebugObj.target = meshContainer;
@@ -169,6 +171,15 @@ namespace UnityVolumeRendering
             //    float maxScale = Mathf.Max(dataset.scaleX, dataset.scaleY, dataset.scaleZ);
             //    volObj.transform.localScale = new Vector3(dataset.scaleX / maxScale, dataset.scaleY / maxScale, dataset.scaleZ / maxScale);
             //}
+
+            meshRenderer.sharedMaterial.SetFloat("bounds", dataset.bounds);
+            meshRenderer.sharedMaterial.SetFloat("lowBound", dataset.lowBound);
+            meshRenderer.sharedMaterial.SetFloat("RotationX", outerObject.transform.rotation.eulerAngles.x);
+            meshRenderer.sharedMaterial.SetFloat("RotationY", outerObject.transform.rotation.eulerAngles.y);
+            meshRenderer.sharedMaterial.SetFloat("RotationZ", outerObject.transform.rotation.eulerAngles.z);
+            meshRenderer.sharedMaterial.SetFloat("ObjDepthX", (float)Math.Round((decimal)dataset.dimX / maxDim, 2));
+            meshRenderer.sharedMaterial.SetFloat("ObjDepthY", (float)Math.Round((decimal)dataset.dimY / maxDim, 2));
+            meshRenderer.sharedMaterial.SetFloat("ObjDepthZ", (float)Math.Round((decimal)dataset.dimZ / maxDim, 2));
 
             return volObj;
         }

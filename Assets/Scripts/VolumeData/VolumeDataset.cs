@@ -25,6 +25,8 @@ namespace UnityVolumeRendering
 
         [SerializeField]
         public string datasetName;
+        public float bounds;
+        public float lowBound;
 
         private float minDataValue = float.MaxValue;
         private float maxDataValue = float.MinValue;

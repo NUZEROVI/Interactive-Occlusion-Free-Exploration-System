@@ -205,16 +205,16 @@ namespace UnityVolumeRendering
                             if (i == 0)
                             {
                                 resetDefault();
-                                mat.EnableKeyword("CylinderWidget"); 
-                                mat.DisableKeyword("BoxWidget");                       
+                                mat.EnableKeyword("DiggingWidget"); 
+                                mat.DisableKeyword("ErasingWidget");                       
                                 SliderEvent[] sliObj = FindObjectsOfType<SliderEvent>();
                                 sliObj[0].sliname = "SLICircleSize";
                             }
                             if (i == 1)
                             {
                                 resetDefault();
-                                mat.EnableKeyword("BoxWidget");
-                                mat.DisableKeyword("CylinderWidget");                                
+                                mat.EnableKeyword("ErasingWidget");
+                                mat.DisableKeyword("DiggingWidget");                                
                                 SliderEvent[] sliObj = FindObjectsOfType<SliderEvent>();
                                 sliObj[0].sliname = "SLISurface";
                             }
