@@ -27,8 +27,8 @@ namespace UnityVolumeRendering
         public Matrix4x4[] camToWorld;
         public Vector4[] camPos;
 
-        MeshRenderer meshRenderer;
-        Material mat;
+        MeshRenderer meshRenderer, meshRenderer_Mask;
+        Material mat, mat_Mask;
 
         public float[] _CircleSize = new float[10];
         public float[] _LensIndexs = new float[10];
@@ -54,6 +54,13 @@ namespace UnityVolumeRendering
             {
                 meshRenderer = objects[0].meshRenderer;
                 mat = meshRenderer.material;
+            }
+
+            VolumeRenderedObject_Mask[] objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
+            if (objects_Mask.Length == 1)
+            {
+                meshRenderer_Mask = objects_Mask[0].meshRenderer;
+                mat_Mask = meshRenderer_Mask.material;
             }
 
             localTrans = GetComponent<Transform>();
@@ -91,6 +98,14 @@ namespace UnityVolumeRendering
             mat.EnableKeyword("MOUSEDOWN_ON");
             mat.SetFloat("_viewCamIndex", 2);
 
+            mat_Mask.SetMatrixArray("_CamToWorld", camToWorld);
+            mat_Mask.SetVectorArray("_camLocalPos", camPos);
+            mat_Mask.SetFloat("_localDepth", localDepth);
+            mat_Mask.SetFloat("_depthNP", depthNP);
+            mat_Mask.SetFloat("_maxDataVal", objects[0].dataset.GetMaxDataValue());
+            mat_Mask.EnableKeyword("MOUSEDOWN_ON");
+            mat_Mask.SetFloat("_viewCamIndex", 2);
+
         }
         void Update()
         {
@@ -109,6 +124,7 @@ namespace UnityVolumeRendering
                     fullProgress -= FillSpeed * Time.deltaTime;
                     _CircleSize[_WidgetNums - 1] = fullProgress;
                     mat.SetFloatArray("_CircleSize", _CircleSize);
+                    mat_Mask.SetFloatArray("_CircleSize", _CircleSize);
                 }
             }
 
@@ -293,6 +309,16 @@ namespace UnityVolumeRendering
                 mat.SetMatrixArray("_RotateMatrixInverse", rotMatrixArrInverse);
                 mat.SetInt("_CurrentWidgetNum", _WidgetNums - 1);
 
+                mat_Mask.SetFloatArray("_CircleSize", _CircleSize);
+                mat_Mask.SetFloatArray("_LensIndexs", _LensIndexs);
+                mat_Mask.SetInt("_WidgetNums", _WidgetNums);
+                mat_Mask.SetInt("_RecordNums", _RecordNums);
+                mat_Mask.SetVectorArray("_WidgetPos", _WidgetPos);
+                mat_Mask.SetVectorArray("_WidgetRecorder", _WidgetRecorder);
+                mat_Mask.SetMatrixArray("_RotateMatrix", rotMatrixArr);
+                mat_Mask.SetMatrixArray("_RotateMatrixInverse", rotMatrixArrInverse);
+                mat_Mask.SetInt("_CurrentWidgetNum", _WidgetNums - 1);
+
                 //partialStop = true;
                 //_CircleSize[_WidgetNums - 1] = 0.1f;
                 //mat.SetFloatArray("_CircleSize", _CircleSize);
@@ -394,10 +420,22 @@ namespace UnityVolumeRendering
                 mat.SetMatrixArray("_RotateMatrixInverse", rotMatrixArrInverse);
                 mat.SetInt("_CurrentWidgetNum", _WidgetNums - 1);
 
+                mat_Mask.SetInt("_WidgetNums", _WidgetNums);
+                mat_Mask.SetInt("_RecordNums", _RecordNums);
+                mat_Mask.SetVectorArray("_WidgetPos", _WidgetPos);
+                mat_Mask.SetVectorArray("_WidgetRecorder", _WidgetRecorder);
+                mat_Mask.SetMatrixArray("_RotateMatrix", rotMatrixArr);
+                mat_Mask.SetMatrixArray("_RotateMatrixInverse", rotMatrixArrInverse);
+                mat_Mask.SetInt("_CurrentWidgetNum", _WidgetNums - 1);
+
+
                 fullStop = true;            
                 _CircleSize[_WidgetNums - 1] = 0.0f;
                 mat.SetFloatArray("_CircleSize", _CircleSize);
                 mat.SetFloatArray("_LensIndexs", _LensIndexs);
+
+                mat_Mask.SetFloatArray("_CircleSize", _CircleSize);
+                mat_Mask.SetFloatArray("_LensIndexs", _LensIndexs);
             }
         }
       

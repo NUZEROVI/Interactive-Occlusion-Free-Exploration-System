@@ -9,8 +9,8 @@ namespace UnityVolumeRendering
     {
         private Button btn;
 
-        MeshRenderer meshRenderer;
-        Material mat;
+        MeshRenderer meshRenderer, meshRenderer_Mask;
+        Material mat, mat_Mask;
 
         void Start()
         {
@@ -30,7 +30,14 @@ namespace UnityVolumeRendering
             {
                 meshRenderer = objects[0].meshRenderer;
                 mat = meshRenderer.material;
-            }    
+            }
+
+            VolumeRenderedObject_Mask[] objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
+            if (objects_Mask.Length == 1)
+            {
+                meshRenderer_Mask = objects_Mask[0].meshRenderer;
+                mat_Mask = meshRenderer_Mask.material;
+            }
 
             int nums = GameObject.Find("SetLensShapeBtn Group").transform.childCount;
        
@@ -76,9 +83,10 @@ namespace UnityVolumeRendering
         
             //_LensShapeNums[lensNum] = btnIndex;
             mat.SetFloatArray("_LensIndexs", _LensIndexs);
-                //sliderObj.sliNumOn = btnIndex;
-                //sliderObj.GetComponent<Slider>().value = _CircleSize[btnIndex];
-            
+            mat_Mask.SetFloatArray("_LensIndexs", _LensIndexs);
+            //sliderObj.sliNumOn = btnIndex;
+            //sliderObj.GetComponent<Slider>().value = _CircleSize[btnIndex];
+
 
             //mat.SetInt("_CurrentWidgetNum", btnIndex);
 

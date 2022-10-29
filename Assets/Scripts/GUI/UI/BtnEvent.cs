@@ -9,8 +9,8 @@ namespace UnityVolumeRendering
     {
         public Button btn;  
   
-        MeshRenderer meshRenderer;
-        Material mat;
+        MeshRenderer meshRenderer, meshRenderer_Mask;
+        Material mat, mat_Mask;
         //float viewCamIndex;   
 
         void Start()
@@ -32,23 +32,34 @@ namespace UnityVolumeRendering
                 mat = meshRenderer.material;
             }
 
+            VolumeRenderedObject_Mask[] objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
+            if (objects_Mask.Length == 1)
+            {
+                meshRenderer_Mask = objects_Mask[0].meshRenderer;
+                mat_Mask = meshRenderer_Mask.material;
+            }
+
             if (btn == "RightBtn")
             {
 
-                objects[0].gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.forward);               
+                objects[0].gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.forward);
+                //objects_Mask[0].gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.forward);
             }
             else if (btn == "LeftBtn")
             {
-                objects[0].gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.forward);               
+                objects[0].gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.forward);
+                //objects_Mask[0].gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.forward);
             }
             else if (btn == "DownBtn")
             {
                 objects[0].gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.right);
+                //objects_Mask[0].gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.right);
             }
             else if (btn == "UpBtn")
             {
 
-                objects[0].gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.right);               
+                objects[0].gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.right);
+                //objects_Mask[0].gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.right);
             }
 
             var localVector = objects[0].gameObject.transform.InverseTransformDirection(Vector3.forward);
@@ -67,7 +78,16 @@ namespace UnityVolumeRendering
             mat.SetFloat("RotationX", objects[0].gameObject.transform.rotation.eulerAngles.x);
             mat.SetFloat("RotationY", objects[0].gameObject.transform.rotation.eulerAngles.y);
             mat.SetFloat("RotationZ", objects[0].gameObject.transform.rotation.eulerAngles.z);
-           
+
+            mat_Mask.SetFloat("_localDepth", localDepth);
+            mat_Mask.SetFloat("_depthNP", depthNP);
+
+            mat_Mask.SetFloat("RotationX", objects[0].gameObject.transform.rotation.eulerAngles.x);
+            mat_Mask.SetFloat("RotationY", objects[0].gameObject.transform.rotation.eulerAngles.y);
+            mat_Mask.SetFloat("RotationZ", objects[0].gameObject.transform.rotation.eulerAngles.z);
+
+
+
 
         }
        
