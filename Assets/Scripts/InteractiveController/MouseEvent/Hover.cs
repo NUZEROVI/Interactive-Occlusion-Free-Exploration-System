@@ -15,7 +15,7 @@ namespace UnityVolumeRendering
         public float maxYRot = 60f;
         public float minYRot = -60f;
 
-        private Transform localTrans, tmpTrans;
+        private Transform localTrans, localMaskTrans;
 
         public Texture2D defaultTexture;
         public Texture2D exitTexture;
@@ -63,8 +63,8 @@ namespace UnityVolumeRendering
                 mat_Mask = meshRenderer_Mask.material;
             }
 
-            localTrans = GetComponent<Transform>();
-            tmpTrans = GetComponent<Transform>();
+            localTrans = GetComponent<Transform>();            
+            localMaskTrans = objects_Mask[0].GetComponent<Transform>().GetChild(0).GetComponent<Transform>();
             myMainCam = Camera.main;
 
             camToWorld = new Matrix4x4[7];
@@ -146,13 +146,19 @@ namespace UnityVolumeRendering
                 localTrans.rotation = Quaternion.AngleAxis(rotY, right) * localTrans.rotation;
             
                 localTrans.localScale = new Vector3(mat.GetFloat("ObjDepthX"), mat.GetFloat("ObjDepthY"), mat.GetFloat("ObjDepthZ"));
-                LimitRot();                
+                localMaskTrans.localScale = new Vector3(mat.GetFloat("ObjDepthX"), mat.GetFloat("ObjDepthY"), mat.GetFloat("ObjDepthZ"));
+                LimitRot();
+                LimitRot_Mask();
             }
             if (Input.GetMouseButtonUp(1))
             {
                 localTrans.localEulerAngles = new Vector3(0.0f, 0.0f, 0.0f);
                 localTrans.parent.localScale = new Vector3(mat.GetFloat("ObjDepthX"), mat.GetFloat("ObjDepthY"), mat.GetFloat("ObjDepthZ"));
-                localTrans.localScale = Vector3.one;     
+                localTrans.localScale = Vector3.one;
+
+                localMaskTrans.localEulerAngles = new Vector3(0.0f, 0.0f, 0.0f);
+                localMaskTrans.parent.localScale = new Vector3(mat_Mask.GetFloat("ObjDepthX"), mat_Mask.GetFloat("ObjDepthY"), mat_Mask.GetFloat("ObjDepthZ")) * 0.7f;                
+                localMaskTrans.localScale = Vector3.one;
             }
     
         }
@@ -190,7 +196,23 @@ namespace UnityVolumeRendering
             localTrans.localRotation = Quaternion.Euler(currentRotation);
             localTrans.parent.localScale = Vector3.one;
         }
-    
+
+        void LimitRot_Mask()
+        {
+            float minRotation = -60;
+            float maxRotation = 60;
+            Vector3 currentRotation = localTrans.localRotation.eulerAngles;
+            currentRotation.x = ConvertToAngle180(currentRotation.x);
+            currentRotation.x = Mathf.Clamp(currentRotation.x, minRotation, maxRotation);
+            currentRotation.y = ConvertToAngle180(currentRotation.y);
+            currentRotation.y = Mathf.Clamp(currentRotation.y, minRotation, maxRotation);
+            currentRotation.z = ConvertToAngle180(currentRotation.z);
+            currentRotation.z = Mathf.Clamp(currentRotation.z, minRotation, maxRotation);
+
+            localMaskTrans.localRotation = Quaternion.Euler(currentRotation);
+            localMaskTrans.parent.localScale = Vector3.one * 0.7f;
+        }
+
 
         void OnMouseDown()
         {

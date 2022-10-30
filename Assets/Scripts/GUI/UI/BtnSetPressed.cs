@@ -19,13 +19,7 @@ namespace UnityVolumeRendering
             {
                 btn.onClick.AddListener(() => BtnPressed(btn.name));
             }
-            objects = FindObjectsOfType<VolumeRenderedObject>();
-            objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
-            if (objects_Mask.Length == 1)
-            {
-                meshRenderer_Mask = objects_Mask[0].meshRenderer;
-                mat_Mask = meshRenderer_Mask.material;
-            }
+           
         }
         public void BtnPressed(string name)
         {
@@ -40,7 +34,14 @@ namespace UnityVolumeRendering
 
             if(name == "ResetBtn")
             {
-      
+                objects = FindObjectsOfType<VolumeRenderedObject>();
+                objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
+                if (objects_Mask.Length == 1)
+                {
+                    meshRenderer_Mask = objects_Mask[0].meshRenderer;
+                    mat_Mask = meshRenderer_Mask.material;
+                }
+
                 if (objects.Length == 1)
                 {
                     meshRenderer = objects[0].meshRenderer;
@@ -66,6 +67,7 @@ namespace UnityVolumeRendering
                         mat.SetInt("_CurrentWidgetNum", 0);
                         mat.SetFloatArray("_CircleSize", obj[0]._CircleSize);
                         mat.SetFloatArray("_LensIndexs", obj[0]._LensIndexs);
+                                                                  
 
                         mat_Mask.SetInt("_WidgetNums", obj[0]._WidgetNums);
                         mat_Mask.SetInt("_RecordNums", obj[0]._RecordNums);
@@ -76,7 +78,6 @@ namespace UnityVolumeRendering
                         mat_Mask.SetInt("_CurrentWidgetNum", 0);
                         mat_Mask.SetFloatArray("_CircleSize", obj[0]._CircleSize);
                         mat_Mask.SetFloatArray("_LensIndexs", obj[0]._LensIndexs);
-
                         obj[0].SetColor(0);
                         int nums = GameObject.Find("SetSizeBtn Group").transform.childCount;
                         for (int i = 0; i < nums; i++)
@@ -87,6 +88,8 @@ namespace UnityVolumeRendering
                             GameObject.Find("CircleNum" + i).GetComponent<Button>().enabled = false;
                         }
                     }
+
+                    
                 }
               
             }          

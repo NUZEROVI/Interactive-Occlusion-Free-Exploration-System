@@ -43,23 +43,23 @@ namespace UnityVolumeRendering
             {
 
                 objects[0].gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.forward);
-                //objects_Mask[0].gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.forward);
+                objects_Mask[0].gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.forward);
             }
             else if (btn == "LeftBtn")
             {
                 objects[0].gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.forward);
-                //objects_Mask[0].gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.forward);
+                objects_Mask[0].gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.forward);
             }
             else if (btn == "DownBtn")
             {
                 objects[0].gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.right);
-                //objects_Mask[0].gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.right);
+                objects_Mask[0].gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.right);
             }
             else if (btn == "UpBtn")
             {
 
                 objects[0].gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.right);
-                //objects_Mask[0].gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.right);
+                objects_Mask[0].gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.right);
             }
 
             var localVector = objects[0].gameObject.transform.InverseTransformDirection(Vector3.forward);

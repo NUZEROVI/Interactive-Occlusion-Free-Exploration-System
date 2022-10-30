@@ -77,7 +77,7 @@ namespace UnityVolumeRendering
                     }
                 }               
                
-                GameObject.Find("Description").GetComponent<Text>().text = description;
+                //GameObject.Find("Description").GetComponent<Text>().text = description;
                 for (int j = 0; j < 2; j++) // Default 4 Cluster
                 {
                     GameObject G1 = GameObject.Find("Glock" + (2 * j)).gameObject;

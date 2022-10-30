@@ -172,8 +172,12 @@ namespace UnityVolumeRendering
                                 meshRenderer = objects[0].meshRenderer;
                                 mat = meshRenderer.material;
 
-                                meshRenderer_Mask = objects_Mask[0].meshRenderer;
-                                mat_Mask = meshRenderer_Mask.material;
+                                VolumeRenderedObject_Mask[] objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
+                                if (objects_Mask.Length == 1)
+                                {
+                                    meshRenderer_Mask = objects_Mask[0].meshRenderer;
+                                    mat_Mask = meshRenderer_Mask.material;
+                                }
 
                                 List<string> fileLines = File.ReadAllLines(isoRangeFilePath).ToList();
 

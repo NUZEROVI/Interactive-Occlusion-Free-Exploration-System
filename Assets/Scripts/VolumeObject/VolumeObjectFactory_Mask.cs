@@ -17,17 +17,20 @@ namespace UnityVolumeRendering
 
             meshContainer.transform.parent = outerObject.transform;
             meshContainer.transform.localScale = Vector3.one;
-            meshContainer.transform.localPosition = Vector3.zero;
-            meshContainer.transform.parent = outerObject.transform;
+            outerObject.transform.localPosition = new Vector3(1.3f, 0.2f, 0.0f);
+            //outerObject.transform.Rotate(0, 20, 0);
+            //meshContainer.transform.localPosition = Vector3.zero;
+            //meshContainer.transform.localScale = Vector3.one;
+           // meshContainer.transform.parent = outerObject.transform;
 
             int maxDim = Math.Max(dataset.dimX, Math.Max(dataset.dimY, dataset.dimZ));
             outerObject.transform.localScale = new Vector3((float)Math.Round((decimal)dataset.dimX / maxDim, 2), (float)Math.Round((decimal)dataset.dimY / maxDim, 2), (float)Math.Round((decimal)dataset.dimZ / maxDim, 2));
-
+            outerObject.transform.localScale = outerObject.transform.localScale * 0.7f;
             GameObject ShaderBuffer_mask = new GameObject("ShaderBuffer_mask");
             ShaderDebugging_Mask shaderDebugObj = ShaderBuffer_mask.AddComponent<ShaderDebugging_Mask>();
             shaderDebugObj.target_Mask = meshContainer;
 
-            outerObject.transform.localRotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
+            outerObject.transform.localRotation = Quaternion.Euler(90.0f, 20.0f, 0.0f);
 
             MeshRenderer meshRenderer = meshContainer.GetComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = new Material(meshRenderer.sharedMaterial);          
@@ -55,7 +58,7 @@ namespace UnityVolumeRendering
             meshRenderer.sharedMaterial.DisableKeyword("MODE_MIP");
             meshRenderer.sharedMaterial.DisableKeyword("MODE_SURF");
 
-         
+
 
             //if(dataset.scaleX != 0.0f && dataset.scaleY != 0.0f && dataset.scaleZ != 0.0f)
             //{
@@ -63,14 +66,14 @@ namespace UnityVolumeRendering
             //    volObj.transform.localScale = new Vector3(dataset.scaleX / maxScale, dataset.scaleY / maxScale, dataset.scaleZ / maxScale);
             //}
 
-            //meshRenderer.sharedMaterial.SetFloat("bounds", dataset.bounds);
-            //meshRenderer.sharedMaterial.SetFloat("lowBound", dataset.lowBound);
-            //meshRenderer.sharedMaterial.SetFloat("RotationX", outerObject.transform.rotation.eulerAngles.x);
-            //meshRenderer.sharedMaterial.SetFloat("RotationY", outerObject.transform.rotation.eulerAngles.y);
-            //meshRenderer.sharedMaterial.SetFloat("RotationZ", outerObject.transform.rotation.eulerAngles.z);
-            //meshRenderer.sharedMaterial.SetFloat("ObjDepthX", (float)Math.Round((decimal)dataset.dimX / maxDim, 2));
-            //meshRenderer.sharedMaterial.SetFloat("ObjDepthY", (float)Math.Round((decimal)dataset.dimY / maxDim, 2));
-            //meshRenderer.sharedMaterial.SetFloat("ObjDepthZ", (float)Math.Round((decimal)dataset.dimZ / maxDim, 2));
+            meshRenderer.sharedMaterial.SetFloat("bounds", dataset.bounds);
+            meshRenderer.sharedMaterial.SetFloat("lowBound", dataset.lowBound);
+            meshRenderer.sharedMaterial.SetFloat("RotationX", outerObject.transform.rotation.eulerAngles.x);
+            meshRenderer.sharedMaterial.SetFloat("RotationY", outerObject.transform.rotation.eulerAngles.y);
+            meshRenderer.sharedMaterial.SetFloat("RotationZ", outerObject.transform.rotation.eulerAngles.z);
+            meshRenderer.sharedMaterial.SetFloat("ObjDepthX", (float)Math.Round((decimal)dataset.dimX / maxDim, 2));
+            meshRenderer.sharedMaterial.SetFloat("ObjDepthY", (float)Math.Round((decimal)dataset.dimY / maxDim, 2));
+            meshRenderer.sharedMaterial.SetFloat("ObjDepthZ", (float)Math.Round((decimal)dataset.dimZ / maxDim, 2));
 
             return volObj;
         }
