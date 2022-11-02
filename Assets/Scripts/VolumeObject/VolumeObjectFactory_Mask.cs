@@ -26,10 +26,12 @@ namespace UnityVolumeRendering
             int maxDim = Math.Max(dataset.dimX, Math.Max(dataset.dimY, dataset.dimZ));
             outerObject.transform.localScale = new Vector3((float)Math.Round((decimal)dataset.dimX / maxDim, 2), (float)Math.Round((decimal)dataset.dimY / maxDim, 2), (float)Math.Round((decimal)dataset.dimZ / maxDim, 2));
             outerObject.transform.localScale = outerObject.transform.localScale * 0.7f;
-            GameObject ShaderBuffer_mask = new GameObject("ShaderBuffer_mask");
-            ShaderDebugging_Mask shaderDebugObj = ShaderBuffer_mask.AddComponent<ShaderDebugging_Mask>();
+            //GameObject ShaderBuffer_mask = new GameObject("ShaderBuffer_mask");
+            GameObject ShaderBuffer_mask = GameObject.Find("ShaderBuffer");
+            ShaderDebugging shaderDebugObj = ShaderBuffer_mask.GetComponent<ShaderDebugging>();
+            //ShaderDebugging_Mask shaderDebugObj = ShaderBuffer_mask.AddComponent<ShaderDebugging_Mask>();
             shaderDebugObj.target_Mask = meshContainer;
-
+            
             outerObject.transform.localRotation = Quaternion.Euler(90.0f, 20.0f, 0.0f);
 
             MeshRenderer meshRenderer = meshContainer.GetComponent<MeshRenderer>();

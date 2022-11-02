@@ -298,7 +298,7 @@ namespace UnityVolumeRendering
                 mat.SetVectorArray("_WidgetRecorder", obj[0]._WidgetRecorder);
                 mat.SetMatrixArray("_RotateMatrix", obj[0].rotMatrixArr);
                 mat.SetMatrixArray("_RotateMatrixInverse", obj[0].rotMatrixArrInverse);
-                mat.SetInt("_CurrentWidgetNum", 0);
+                mat.SetInt("_CurrentWidgetNum", -1);
                 mat.SetFloatArray("_CircleSize", obj[0]._CircleSize);
                 mat.SetFloatArray("_LensIndexs", obj[0]._LensIndexs);
 
@@ -308,10 +308,18 @@ namespace UnityVolumeRendering
                 mat_Mask.SetVectorArray("_WidgetRecorder", obj[0]._WidgetRecorder);
                 mat_Mask.SetMatrixArray("_RotateMatrix", obj[0].rotMatrixArr);
                 mat_Mask.SetMatrixArray("_RotateMatrixInverse", obj[0].rotMatrixArrInverse);
-                mat_Mask.SetInt("_CurrentWidgetNum", 0);
+                mat_Mask.SetInt("_CurrentWidgetNum", -1);
                 mat_Mask.SetFloatArray("_CircleSize", obj[0]._CircleSize);
                 mat_Mask.SetFloatArray("_LensIndexs", obj[0]._LensIndexs);
 
+                if (mat_Mask.GetInt("_allcomponent_on") == 1)
+                {
+                    GameObject.Find("BtnState").GetComponent<Text>().text = " - ";
+                }
+                else if (mat_Mask.GetInt("_allcomponent_on") == 0)
+                {
+                    GameObject.Find("BtnState").GetComponent<Text>().text = "[ ALL ]";
+                }
 
                 obj[0].SetColor(0);
 

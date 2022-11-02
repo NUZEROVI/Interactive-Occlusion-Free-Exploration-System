@@ -104,6 +104,8 @@ namespace UnityVolumeRendering
             mat_Mask.SetFloat("_depthNP", depthNP);
             mat_Mask.SetFloat("_maxDataVal", objects[0].dataset.GetMaxDataValue());
             mat_Mask.EnableKeyword("MOUSEDOWN_ON");
+            mat_Mask.EnableKeyword("AllComponents");
+            mat_Mask.SetInt("_allcomponent_on", 0);
             mat_Mask.SetFloat("_viewCamIndex", 2);
 
         }
@@ -341,6 +343,14 @@ namespace UnityVolumeRendering
                 mat_Mask.SetMatrixArray("_RotateMatrixInverse", rotMatrixArrInverse);
                 mat_Mask.SetInt("_CurrentWidgetNum", _WidgetNums - 1);
 
+                if (mat_Mask.GetInt("_allcomponent_on") == 1)
+                {
+                    GameObject.Find("BtnState").GetComponent<Text>().text = (mat_Mask.GetInt("_CurrentWidgetNum")+1).ToString();
+                }
+                else if (mat_Mask.GetInt("_allcomponent_on") == 0)
+                {
+                    GameObject.Find("BtnState").GetComponent<Text>().text = "[ ALL ]";
+                }
                 //partialStop = true;
                 //_CircleSize[_WidgetNums - 1] = 0.1f;
                 //mat.SetFloatArray("_CircleSize", _CircleSize);
@@ -450,6 +460,14 @@ namespace UnityVolumeRendering
                 mat_Mask.SetMatrixArray("_RotateMatrixInverse", rotMatrixArrInverse);
                 mat_Mask.SetInt("_CurrentWidgetNum", _WidgetNums - 1);
 
+                if (mat_Mask.GetInt("_allcomponent_on") == 1)
+                {
+                    GameObject.Find("BtnState").GetComponent<Text>().text = (mat_Mask.GetInt("_CurrentWidgetNum") + 1).ToString();
+                }
+                else if (mat_Mask.GetInt("_allcomponent_on") == 0)
+                {
+                    GameObject.Find("BtnState").GetComponent<Text>().text = "[ ALL ]";
+                }
 
                 fullStop = true;            
                 _CircleSize[_WidgetNums - 1] = 0.0f;

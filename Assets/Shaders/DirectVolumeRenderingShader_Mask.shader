@@ -9,6 +9,7 @@
         _SegmentTex("Segment Texture (Generated)", 3D) = "" {}
         _MinVal("Min val", Range(0.0, 1.0)) = 0.0
         _MaxVal("Max val", Range(0.0, 1.0)) = 1.0
+        _allcomponent_on("Allcomponent_on", Int) = 0
     }
         SubShader
         {
@@ -23,7 +24,7 @@
             {
                 CGPROGRAM
                 #pragma multi_compile __ MOUSEDOWN_ON
-                #pragma multi_compile __ DiggingWidget ErasingWidget
+                #pragma multi_compile __ DiggingWidget ErasingWidget      
                 #pragma multi_compile MODE_DVR MODE_MIP MODE_SURF
                 #pragma multi_compile __ TF2D_ON
                 #pragma multi_compile __ CUTOUT_PLANE CUTOUT_BOX_INCL CUTOUT_BOX_EXCL
@@ -34,13 +35,13 @@
                 #pragma vertex vert
                 #pragma fragment frag
                 #pragma target 4.5
-                RWStructuredBuffer<float4> buffer: register(u1);
+                RWStructuredBuffer<float4> buffer_Mask: register(u2);
 
                 #include "UnityCG.cginc"
                 #include "SDF.cginc"
 
                 #define MOUSEDOWN_ON DiggingWidget || ErasingWidget
-                #define CUTOUT_ON CUTOUT_PLANE || CUTOUT_BOX_INCL || CUTOUT_BOX_EXCL
+                #define CUTOUT_ON CUTOUT_PLANE || CUTOUT_BOX_INCL || CUTOUT_BOX_EXCL         
 
                 struct vert_in
                 {
@@ -81,6 +82,8 @@
                 float4 _WidgetRecorder[10];
                 int _WidgetNums = 0;
                 int _RecordNums = 0;
+                int _allcomponent_on;
+                int _CurrentWidgetNum =0;
                 float4x4 _RenderRotate;
                 float4x4 _RotateMatrix[10];
                 float4x4 _RotateMatrixInverse[10];
@@ -781,10 +784,10 @@
 
                         for (int j = 0; j < _WidgetNums - 1; j++) {
                             if (!(sdCylinder(currPos, r1, r2, _CircleSize[j], _RotateMatrix[j]))) {
-                                float2 visIsoRange = findIsoRange((int)buffer[j].z);
+                                float2 visIsoRange = findIsoRange((int)buffer_Mask[j].z);
                                 if ((density >= visIsoRange.x && density <= visIsoRange.y)) {
                                     const float segDensity1 = getSegCluser(currPos);
-                                    if (round(segDensity1) == buffer[j].w) {
+                                    if (round(segDensity1) == buffer_Mask[j].w) {
                                         inside = true;
                                     }
                                 }
@@ -886,8 +889,11 @@
                         bool isMask = false;
                         pIndex = findClusterIndex(getDensity(currPos));
                         float dp = 0.0f;
+                    
                         for (uint jStep = 0; jStep < _WidgetNums; jStep++) {
-
+                            if (_allcomponent_on == 1 && _CurrentWidgetNum != jStep) {
+                                continue;
+                            }
                             float3 r1 = float3(_WidgetPos[jStep].x, _WidgetPos[jStep].y, _WidgetPos[jStep].z);// -0.215 // _WidgetPos[jStep].z
                             float3 r2 = float3(_WidgetPos[jStep].x, _WidgetPos[jStep].y, _WidgetPos[jStep].z + (-(_WidgetPos[jStep].z)) * 2); // 0.215 //         
 
@@ -1010,25 +1016,29 @@
 
                         if (!(isMask)) {
                             continue;
-                        }
+                        }                                             
 
     #elif ErasingWidget
                         bool isInside = false;
                         float sameIsoSeg = -1.0f;
+                        bool isMask = false;
 
                         if (_WidgetNums == 0) {
                             for (int s = 0; s < 10; s++) {
-                                buffer[s] = float4(0, 0, 0, 0);
+                                buffer_Mask[s] = float4(0, 0, 0, 0);
                             }
                         }
 
                         for (uint jStep = 0; jStep < _WidgetNums; jStep++) {
+                            if (_allcomponent_on == 1 && _CurrentWidgetNum != jStep) {
+                                continue;
+                            }
 
                             float3 r1 = float3(_WidgetPos[jStep].x, _WidgetPos[jStep].y, _WidgetPos[jStep].z);
                             float3 r2 = float3(_WidgetPos[jStep].x, _WidgetPos[jStep].y, _WidgetPos[jStep].z + (-(_WidgetPos[jStep].z)) * 2);
                             float2 selectCindex;
 
-                            if (buffer[jStep].x == 0) {
+                            if (buffer_Mask[jStep].x == 0) {
 
                                 if ((sdCylinder(currPos, r1, r2, 0.0005f, _RotateMatrix[jStep]))) {
                                     float4 visData = float4(0.0f, 0.0f, -2.0f, 0.0f);
@@ -1048,8 +1058,8 @@
                                     }
 
                                     if (jStep == _WidgetNums - 1) {
-                                        if (buffer[jStep].x == 0) {
-                                            buffer[jStep] = max(buffer[jStep], float4(1, 0, selectCindex.x, selectCindex.y));
+                                        if (buffer_Mask[jStep].x == 0) {
+                                            buffer_Mask[jStep] = max(buffer_Mask[jStep], float4(1, 0, selectCindex.x, selectCindex.y));
                                         }
                                     }
                                 }
@@ -1058,17 +1068,20 @@
                             const float density1 = getDensity(currPos);
                             if (!(sdCylinder(currPos, r1, r2, _CircleSize[jStep], _RotateMatrix[jStep]))) {
 
-                                float2 visIsoRange = findIsoRange((int)buffer[jStep].z);
+                                float2 visIsoRange = findIsoRange((int)buffer_Mask[jStep].z);
                                 if ((density1 >= visIsoRange.x && density1 <= visIsoRange.y)) {
                                     const float segDensity = getSegCluser(currPos);
-                                    if (round(segDensity) == buffer[jStep].w) {
-                                        isInside = true;
+                                    if (round(segDensity) == buffer_Mask[jStep].w) {                                       
+                                        isMask = true;
                                     }
                                 }
                             }
                         }
 
-                        if (isInside) continue;
+                        if (!(isMask)) {
+                            continue;
+                        }
+
     #endif
     #else
 

@@ -109,7 +109,16 @@ namespace UnityVolumeRendering
             }
 
             mat.SetInt("_CurrentWidgetNum", btnIndex);
-            mat_Mask.SetInt("_CurrentWidgetNum", btnIndex);
+            mat_Mask.SetInt("_CurrentWidgetNum", btnIndex);   
+            
+            if(mat_Mask.GetInt("_allcomponent_on") == 1)
+            {
+                GameObject.Find("BtnState").GetComponent<Text>().text = (btnIndex+1).ToString();
+            }
+            else if (mat_Mask.GetInt("_allcomponent_on") == 0)
+            {
+                GameObject.Find("BtnState").GetComponent<Text>().text = "[ ALL ]";
+            }
 
         }
     }
