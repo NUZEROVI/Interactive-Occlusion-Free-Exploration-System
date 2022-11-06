@@ -2,12 +2,48 @@
 
 <p align="center"><img src="https://github.com/NUZEROVI/Interactive_Occlusion_Free_Exploration_System/blob/VolumeVis/Screenshots/Interface.png"></p>
 
-## Abstract
-*The occlusion problem is possible that there are potentially critical hidden features in the volumetric data that cannot be discovered. This is the primary problem when rendering volumes to 2D screens. Numerous techniques, such as tuning the transfer function (TF), isosurface extraction, etc., have been proposed in the past to address the occlusion problem and assist experts in exploring volumetric data. However, it is difficult for non-expert users with little prior knowledge to spend hours learning related information, such as how to tune the TF or the relation between opacity and volumetric data. Existing systems for non-expert users still need users to comprehend the opacity function. Therefore, we propose a progressive digging interaction to allow non-expert users’ exploration approach, which is intuitive and closer to daily life behavior. We also provide a navigation view of the feature structure and enable non-expert users to begin using the volume exploration system with minimum prior knowledge. In addition, we collect user feedback in several fields through case studies to illustrate our system’s usability, practicality, and applicability.*
-
-## Algorithm Overview
+## Algorithm Overview (step-by-step)
+The project can be divided into three stages :
+1. Volume Render (Load raw datasets and raymarching technique)
+2. Volume Pre-Computation (Material classfication and non-connected segmentation)
+3. Volume Exploration (Obstruction selection and 2 occision removal modes)
 <p align="center"><img src="https://github.com/NUZEROVI/Interactive_Occlusion_Free_Exploration_System/blob/VolumeVis/Screenshots/Algo_overview.png"></p>
 
+## Volume Render 
+Fork from [`mlavik1/UnityVolumeRendering`](https://github.com/mlavik1/UnityVolumeRendering), describe how the volume rendering algorithm works. such as load raw datasets, raymarching technique, transfer functions, and direct volume rendering implementation.
+
+## Volume Pre-Computation
+
+You can see more details on a branch called "Isosurface-Mesh-Non-Connected-Segmentation".
+
+### Material classfication (Isosurface Similarity &  Hierarchical Clustering)
+
+We were inspried by previous research from the paper "Isosurface similarity maps", which identify the most representative structures of material based on information theory.
+We implemented information theory to measure isosurface similarity map in `Scripts/VolumeObject/VolumeObjectFactory.cs`, by using the SeawispHunter.Maths, a C# library with Unity as Plugins  `Resources/Maths.dll` and `Resources/xunit.assert.dll` to compute entropy, conditional entropy, and mutual information.
+
+In order to automatically identify ranges of iso-values that make up the major structure of the material, we next use a hierarchical clustering algorithm to cluster the isosurfaces of isovalues in `Scripts/PyCode_Clustering_Heapmap/Clustering.ipynb`.
+
+### Non-connected Segmentation (Approximate Convex Meshes & Collider Detect)
+We segment the material structure into connected components by using the V-HACD library with Unity as Plugins `Resources/VHACD_DLL.dll` and `Resources/libvhacd.dll` to merge any triangle meshes as convex solutions. 
+
+Then, the approximate convex decomposition meshes that collide with each other are considered as connected structures and combined into the same piece.
+
+## Volume Exploration
+You can see more details regarding occlusion removal for interact on a branch called "VolumeVis".
+
+### Obstruction Selection
+You can see `Shaders/SDF.cginc` for the lens placement is definition of Signed distance function(SDF) and `Shaders/DirectVolumeRenderingShader.shader` called that function to check `insideLens`, if true, we follow the priniple of WYSIWYG to design our obstruction selection function.
+
+We utilize the paper "WYSIWYP: What You See Is What You Pick", a clssic visibility-oriented picking technique has to compute the first and second derivative of the accumulated opacity of the ray to determine the change in the maximum opacity value of the material to determine the selected material. Unlike them, we calculate each material structure's ray-accumulated opacity, visibility (*alpha*), to determine the most visible material.
+
+### Occulsion Removal Modes
+1. local digging structure mode ( `DiggingWidget` in `Shaders/DirectVolumeRenderingShader.shader`)
+   
+   This mode removes the obstruction locally and keeps the context around the local region.
+2. Global erasing structure mode ( `ErasingWidget` in `Shaders/DirectVolumeRenderingShader.shader`)
+   
+   This mode removes a whole connected material structure when users think that the whole material structure is well explored.
+   
 ## Interactive System Interface
 <p align="center"><img src="https://github.com/NUZEROVI/Interactive_Occlusion_Free_Exploration_System/blob/only-for-survey-use/survey_use/Screenshots/Antialias_Interface_original_size.gif"></p>
 
