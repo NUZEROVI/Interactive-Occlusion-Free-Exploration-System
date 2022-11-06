@@ -274,7 +274,9 @@
                 }
                 float2 findIsoRange(float index)
                 {
-                    float2 val = _isoCluster[index] / _maxDataVal;
+                    float2 val;
+                    val.x = _isoCluster[index].x / _maxDataVal;
+                    val.y = (_isoCluster[index].y + 1) / _maxDataVal;
                     return val;
                 }
 
@@ -1023,16 +1025,8 @@
                         float sameIsoSeg = -1.0f;
                         bool isMask = false;
 
-                        if (_WidgetNums == 0) {
-                            for (int s = 0; s < 10; s++) {
-                                buffer_Mask[s] = float4(0, 0, 0, 0);
-                            }
-                        }
-
                         for (uint jStep = 0; jStep < _WidgetNums; jStep++) {
-                            if (_allcomponent_on == 1 && _CurrentWidgetNum != jStep) {
-                                continue;
-                            }
+                          
 
                             float3 r1 = float3(_WidgetPos[jStep].x, _WidgetPos[jStep].y, _WidgetPos[jStep].z);
                             float3 r2 = float3(_WidgetPos[jStep].x, _WidgetPos[jStep].y, _WidgetPos[jStep].z + (-(_WidgetPos[jStep].z)) * 2);
@@ -1056,22 +1050,19 @@
                                             selectCindex = float2(visDataInverse.z, round(getSegCluser(float3(visDataInverse.x, visDataInverse.y, visDataInverse.w))));
                                         }
                                     }
-
-                                    if (jStep == _WidgetNums - 1) {
-                                        if (buffer_Mask[jStep].x == 0) {
-                                            buffer_Mask[jStep] = max(buffer_Mask[jStep], float4(1, 0, selectCindex.x, selectCindex.y));
-                                        }
-                                    }
+                               
                                 }
 
                             }
                             const float density1 = getDensity(currPos);
                             if (!(sdCylinder(currPos, r1, r2, _CircleSize[jStep], _RotateMatrix[jStep]))) {
-
                                 float2 visIsoRange = findIsoRange((int)buffer_Mask[jStep].z);
                                 if ((density1 >= visIsoRange.x && density1 <= visIsoRange.y)) {
                                     const float segDensity = getSegCluser(currPos);
-                                    if (round(segDensity) == buffer_Mask[jStep].w) {                                       
+                                    if (round(segDensity) == buffer_Mask[jStep].w) { 
+                                        if (_allcomponent_on == 1 && _CurrentWidgetNum != jStep) {
+                                            continue;
+                                        }
                                         isMask = true;
                                     }
                                 }

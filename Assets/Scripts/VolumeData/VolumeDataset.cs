@@ -122,6 +122,46 @@ namespace UnityVolumeRendering
             }
         }
 
+        float[] LoadFloatArrayFromFile(string path)
+        {
+            byte[] a = System.IO.File.ReadAllBytes(path);
+            float[] b = new float[a.Length / 4];
+            System.Buffer.BlockCopy(a, 0, b, 0, a.Length);
+            return b;
+        }
+
+        public Texture3D GenerateVolume()
+        {           
+            float[] source = LoadFloatArrayFromFile(AnalysisBtn.FindObjectsOfType<AnalysisBtn>()[0].segTexturePath);
+            TextureFormat texformat = SystemInfo.SupportsTextureFormat(TextureFormat.RHalf) ? TextureFormat.RHalf : TextureFormat.RFloat;
+            Texture3D volume = new Texture3D(dimX, dimY, dimZ, texformat, false);
+            volume.wrapMode = TextureWrapMode.Clamp;
+            volume.filterMode = FilterMode.Point;
+
+            float minValue = Mathf.Min(source);
+            float maxValue = Mathf.Max(source);
+            float maxRange = maxValue - minValue;
+
+            float step = (float)decimal.Round((decimal)0.5f / (decimal)maxValue, 2);
+            bounds = (float)decimal.Round((decimal)0.25f / (decimal)maxValue, 2);
+            lowBound = (float)decimal.Round((decimal)(1.0f - maxValue * step), 2) - bounds;
+
+            for (int x = 0; x < dimX; ++x)
+            {
+                for (int y = 0; y < dimY; ++y)
+                {
+                    for (int z = 0; z < dimZ; ++z)
+                    {
+                        volume.SetPixel(x, y, z, new Color((float)(source[x + y * dimX + z * (dimX * dimY)] - minValue) / maxRange, 0.0f, 0.0f, 0.0f));
+                    }
+                }
+            }
+
+            volume.Apply();
+            return volume;
+        }
+
+
         private Texture3D CreateTextureInternal()
         {
             TextureFormat texformat = SystemInfo.SupportsTextureFormat(TextureFormat.RHalf) ? TextureFormat.RHalf : TextureFormat.RFloat;
