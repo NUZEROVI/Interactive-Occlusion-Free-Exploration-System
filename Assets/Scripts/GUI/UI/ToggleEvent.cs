@@ -11,12 +11,9 @@ namespace UnityVolumeRendering
     {
         Toggle m_Toggle;
         GameObject toggleGroupObj;
-        bool isOn;
 
-        MeshRenderer meshRenderer;
-        Material mat;
-        private TFRenderMode tfRenderMode;
-        private RenderMode renderMode;
+        MeshRenderer meshRenderer, meshRenderer_Mask;
+        Material mat, mat_Mask;
 
         [HideInInspector]
         public TransferFunction transferFunction;
@@ -25,6 +22,7 @@ namespace UnityVolumeRendering
         public TransferFunction2D transferFunction2D;
 
         VolumeRenderedObject[] objects;
+        VolumeRenderedObject_Mask[] objects_Mask;
         public float[] isoRange = new float[20];
         public Vector4[] isoCluster = new Vector4[20];
 
@@ -55,6 +53,13 @@ namespace UnityVolumeRendering
             {
                 meshRenderer = objects[0].meshRenderer;
                 mat = meshRenderer.material;
+            }
+
+            objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
+            if (objects_Mask.Length == 1)
+            {
+                meshRenderer_Mask = objects_Mask[0].meshRenderer;
+                mat_Mask = meshRenderer_Mask.material;
             }
 
             matSetting();
@@ -167,6 +172,13 @@ namespace UnityVolumeRendering
                                 meshRenderer = objects[0].meshRenderer;
                                 mat = meshRenderer.material;
 
+                                VolumeRenderedObject_Mask[] objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
+                                if (objects_Mask.Length == 1)
+                                {
+                                    meshRenderer_Mask = objects_Mask[0].meshRenderer;
+                                    mat_Mask = meshRenderer_Mask.material;
+                                }
+
                                 List<string> fileLines = File.ReadAllLines(isoRangeFilePath).ToList();
 
                                 int range = 0; //dataset.GetMinDataValue();
@@ -192,11 +204,17 @@ namespace UnityVolumeRendering
                                 mat.SetFloatArray("_isoRange", isoRange);
                                 mat.SetVectorArray("_isoCluster", isoCluster);
 
-                                
+                                mat_Mask.SetInt("_isoCount", Count);
+                                mat_Mask.SetFloatArray("_isoRange", isoRange);
+                                mat_Mask.SetVectorArray("_isoCluster", isoCluster);
+
+
                                 TransferFunction newTF = TransferFunctionDatabase.LoadTransferFunction(tfPath);
                                 if (newTF != null)
                                     objects[0].transferFunction = newTF;
+                                    objects_Mask[0].transferFunction = newTF;
                                 objects[0].UpdateMaterialProperties();
+                                objects_Mask[0].UpdateMaterialProperties();
                                 resetDefault();
                             }
 
@@ -206,7 +224,9 @@ namespace UnityVolumeRendering
                             {
                                 resetDefault();
                                 mat.EnableKeyword("DiggingWidget"); 
-                                mat.DisableKeyword("ErasingWidget");                       
+                                mat.DisableKeyword("ErasingWidget");
+                                mat_Mask.EnableKeyword("DiggingWidget");
+                                mat_Mask.DisableKeyword("ErasingWidget");
                                 SliderEvent[] sliObj = FindObjectsOfType<SliderEvent>();
                                 sliObj[0].sliname = "SLICircleSize";
                             }
@@ -214,7 +234,9 @@ namespace UnityVolumeRendering
                             {
                                 resetDefault();
                                 mat.EnableKeyword("ErasingWidget");
-                                mat.DisableKeyword("DiggingWidget");                                
+                                mat.DisableKeyword("DiggingWidget");
+                                mat_Mask.EnableKeyword("ErasingWidget");
+                                mat_Mask.DisableKeyword("DiggingWidget");
                                 SliderEvent[] sliObj = FindObjectsOfType<SliderEvent>();
                                 sliObj[0].sliname = "SLISurface";
                             }
@@ -226,18 +248,28 @@ namespace UnityVolumeRendering
                             {
                                 if (i == 0) objects[0].SetLightingEnabled(true);                             
                                 if (i == 1) objects[0].SetLightingEnabled(false);
-                            }                           
+                            }
+                            objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
+                            if (objects_Mask.Length == 1)
+                            {
+                                if (i == 0) objects_Mask[0].SetLightingEnabled(true);
+                                if (i == 1) objects_Mask[0].SetLightingEnabled(false);
+                            }
                             break;
                         case "Surface Toggle Group":
                             if (i == 0)
                             {
-                                mat.EnableKeyword("Full_ON");
-                                mat.DisableKeyword("PartialOn");
+                                mat.EnableKeyword("ErasingWidget");
+                                mat.DisableKeyword("DiggingWidget");
+                                mat_Mask.EnableKeyword("ErasingWidget");
+                                mat_Mask.DisableKeyword("DiggingWidget");
                             }
                             if (i == 1)
                             {
-                                mat.EnableKeyword("PartialOn");
-                                mat.DisableKeyword("Full_ON");
+                                mat.EnableKeyword("DiggingWidget");
+                                mat.DisableKeyword("ErasingWidget");
+                                mat_Mask.EnableKeyword("DiggingWidget");
+                                mat_Mask.DisableKeyword("ErasingWidget");
                             }
                             break;
                     }
@@ -266,9 +298,28 @@ namespace UnityVolumeRendering
                 mat.SetVectorArray("_WidgetRecorder", obj[0]._WidgetRecorder);
                 mat.SetMatrixArray("_RotateMatrix", obj[0].rotMatrixArr);
                 mat.SetMatrixArray("_RotateMatrixInverse", obj[0].rotMatrixArrInverse);
-                mat.SetInt("_CurrentWidgetNum", 0);
+                mat.SetInt("_CurrentWidgetNum", -1);
                 mat.SetFloatArray("_CircleSize", obj[0]._CircleSize);
                 mat.SetFloatArray("_LensIndexs", obj[0]._LensIndexs);
+
+                mat_Mask.SetInt("_WidgetNums", obj[0]._WidgetNums);
+                mat_Mask.SetInt("_RecordNums", obj[0]._RecordNums);
+                mat_Mask.SetVectorArray("_WidgetPos", obj[0]._WidgetPos);
+                mat_Mask.SetVectorArray("_WidgetRecorder", obj[0]._WidgetRecorder);
+                mat_Mask.SetMatrixArray("_RotateMatrix", obj[0].rotMatrixArr);
+                mat_Mask.SetMatrixArray("_RotateMatrixInverse", obj[0].rotMatrixArrInverse);
+                mat_Mask.SetInt("_CurrentWidgetNum", -1);
+                mat_Mask.SetFloatArray("_CircleSize", obj[0]._CircleSize);
+                mat_Mask.SetFloatArray("_LensIndexs", obj[0]._LensIndexs);
+
+                if (mat_Mask.GetInt("_allcomponent_on") == 1)
+                {
+                    GameObject.Find("BtnState").GetComponent<Text>().text = " - ";
+                }
+                else if (mat_Mask.GetInt("_allcomponent_on") == 0)
+                {
+                    GameObject.Find("BtnState").GetComponent<Text>().text = "[ ALL ]";
+                }
 
                 obj[0].SetColor(0);
 
@@ -289,6 +340,8 @@ namespace UnityVolumeRendering
             }
 
         }
+
+      
 
     }
 }

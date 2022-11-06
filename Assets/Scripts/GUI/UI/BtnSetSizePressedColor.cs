@@ -9,8 +9,8 @@ namespace UnityVolumeRendering
     {
         private Button btn;
 
-        MeshRenderer meshRenderer;
-        Material mat;
+        MeshRenderer meshRenderer, meshRenderer_Mask;
+        Material mat, mat_Mask;
 
         void Start()
         {
@@ -31,6 +31,14 @@ namespace UnityVolumeRendering
                 meshRenderer = objects[0].meshRenderer;
                 mat = meshRenderer.material;
             }
+
+            VolumeRenderedObject_Mask[] objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
+            if (objects_Mask.Length == 1)
+            {
+                meshRenderer_Mask = objects_Mask[0].meshRenderer;
+                mat_Mask = meshRenderer_Mask.material;
+            }
+
             SliderEvent sliderObj = FindObjectOfType<SliderEvent>();
 
             int nums = GameObject.Find("SetSizeBtn Group").transform.childCount;
@@ -101,6 +109,16 @@ namespace UnityVolumeRendering
             }
 
             mat.SetInt("_CurrentWidgetNum", btnIndex);
+            mat_Mask.SetInt("_CurrentWidgetNum", btnIndex);   
+            
+            if(mat_Mask.GetInt("_allcomponent_on") == 1)
+            {
+                GameObject.Find("BtnState").GetComponent<Text>().text = (btnIndex+1).ToString();
+            }
+            else if (mat_Mask.GetInt("_allcomponent_on") == 0)
+            {
+                GameObject.Find("BtnState").GetComponent<Text>().text = "[ ALL ]";
+            }
 
         }
     }

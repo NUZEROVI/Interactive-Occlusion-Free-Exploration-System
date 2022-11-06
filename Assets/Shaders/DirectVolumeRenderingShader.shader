@@ -35,6 +35,7 @@
             #pragma fragment frag
             #pragma target 4.5
             RWStructuredBuffer<float4> buffer: register(u1);
+            RWStructuredBuffer<float4> buffer_Mask: register(u2);
 
             #include "UnityCG.cginc"
             #include "SDF.cginc"
@@ -1017,6 +1018,7 @@
                     if (_WidgetNums == 0) {
                         for (int s = 0; s < 10; s++) {
                             buffer[s] = float4(0, 0, 0, 0);
+                            buffer_Mask[s] = float4(0, 0, 0, 0);
                         }
                     }
 
@@ -1048,6 +1050,7 @@
                                 if (jStep == _WidgetNums - 1) {
                                     if (buffer[jStep].x == 0) {
                                         buffer[jStep] = max(buffer[jStep], float4(1, 0, selectCindex.x, selectCindex.y));
+                                        buffer_Mask[jStep] = buffer[jStep];
                                     }
                                 }
                             }

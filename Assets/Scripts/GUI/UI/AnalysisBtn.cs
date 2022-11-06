@@ -19,8 +19,8 @@ namespace UnityVolumeRendering
         public string isoRangeFilePath;
         public string tFFilePath;
         public string segTexturePath;
-        MeshRenderer meshRenderer;
-        Material mat;
+        MeshRenderer meshRenderer, meshRenderer_Mask;
+        Material mat, mat_Mask;
         public float[] isoRange = new float[20];
         public Vector4[] isoCluster = new Vector4[20];
 
@@ -73,10 +73,11 @@ namespace UnityVolumeRendering
                         endianness = initData.endianness;
                         ImportRawData();
                         GetIsoRangeAndSetTF();
+                        GetIsoRangeAndSetTF_Mask();
                     }
                 }               
                
-                GameObject.Find("Description").GetComponent<Text>().text = description;
+                //GameObject.Find("Description").GetComponent<Text>().text = description;
                 for (int j = 0; j < 2; j++) // Default 4 Cluster
                 {
                     GameObject G1 = GameObject.Find("Glock" + (2 * j)).gameObject;
@@ -106,14 +107,20 @@ namespace UnityVolumeRendering
                 }
               
                 VolumeRenderedObject obj = VolumeObjectFactory.CreateObject(dataset);
-              
-                if(eulerX == 180.0f)
+                VolumeRenderedObject_Mask obj_Mask = VolumeObjectFactory_Mask.CreateObject(dataset);
+                
+                if (eulerX == 180.0f)
                 {
                     obj.gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.right);
-                }else if(eulerX == 0.0f)
+                    obj_Mask.gameObject.transform.rotation *= Quaternion.AngleAxis(90, Vector3.right);
+                }
+                else if(eulerX == 0.0f)
                 {
                     obj.gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.right);
+                    obj_Mask.gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.right);
                 }
+
+               
             }
             else
             {
@@ -161,12 +168,66 @@ namespace UnityVolumeRendering
             //{
             TransferFunction newTF = TransferFunctionDatabase.LoadTransferFunction(tFFilePath);
             if (newTF != null)
+            {
                 objects[0].transferFunction = newTF;
                 //objects[0].SetVisibilityWindow(0.58f, 1.0f);
                 objects[0].UpdateMaterialProperties();
-           // }
+                // }
+            }
+
 
         }
-        
+
+
+        void GetIsoRangeAndSetTF_Mask()
+        {
+            VolumeRenderedObject_Mask[] objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
+            if (objects_Mask.Length == 1)
+            {
+                meshRenderer_Mask = objects_Mask[0].meshRenderer;
+                mat_Mask = meshRenderer_Mask.material;
+            }
+            //if(isoRangeFilePath != "")
+            //{
+            List<string> fileLines = File.ReadAllLines(isoRangeFilePath).ToList();
+
+            int range = 0; //dataset.GetMinDataValue();
+            int Count = 0;
+            foreach (string line in fileLines)
+            {
+                range += int.Parse(line);
+
+                isoRange[Count] = range;
+
+                if (Count == 0)
+                {
+                    isoCluster[Count] = new Vector4(0, isoRange[Count] - 1);
+                }
+                else
+                {
+                    isoCluster[Count] = new Vector4(isoRange[Count - 1], isoRange[Count] - 1);
+                }
+                Count++;
+            }
+
+            mat_Mask.SetInt("_isoCount", Count);
+            mat_Mask.SetFloatArray("_isoRange", isoRange);
+            mat_Mask.SetVectorArray("_isoCluster", isoCluster);
+            // }
+
+            //if (tFFilePath != "")
+            //{
+            TransferFunction newTF = TransferFunctionDatabase.LoadTransferFunction(tFFilePath);
+            if (newTF != null)
+            {
+                objects_Mask[0].transferFunction = newTF;
+                //objects[0].SetVisibilityWindow(0.58f, 1.0f);
+                objects_Mask[0].UpdateMaterialProperties();
+                // }
+            }
+
+
+        }
+
     }
 }

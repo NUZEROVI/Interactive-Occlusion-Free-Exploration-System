@@ -122,8 +122,9 @@ namespace UnityVolumeRendering
         {
             GameObject outerObject = new GameObject("VolumeRenderedObject_" + dataset.datasetName);
             VolumeRenderedObject volObj = outerObject.AddComponent<VolumeRenderedObject>();
-
+      
             GameObject meshContainer = GameObject.Instantiate((GameObject)Resources.Load("VolumeContainer"));
+            
             meshContainer.transform.parent = outerObject.transform;
             meshContainer.transform.localScale = Vector3.one;
             meshContainer.transform.localPosition = Vector3.zero;
@@ -142,7 +143,8 @@ namespace UnityVolumeRendering
             outerObject.transform.localRotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
 
             MeshRenderer meshRenderer = meshContainer.GetComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = new Material(meshRenderer.sharedMaterial);
+            meshRenderer.sharedMaterial = new Material(meshRenderer.sharedMaterial);           
+
             volObj.meshRenderer = meshRenderer;
             volObj.dataset = dataset;
 
@@ -153,19 +155,19 @@ namespace UnityVolumeRendering
             TransferFunction tf = TransferFunctionDatabase.CreateTransferFunction();
             Texture2D tfTexture = tf.GetTexture();
             volObj.transferFunction = tf;
-
+          
             TransferFunction2D tf2D = TransferFunctionDatabase.CreateTransferFunction2D();
             volObj.transferFunction2D = tf2D;
-
+          
             meshRenderer.sharedMaterial.SetTexture("_DataTex", dataset.GetDataTexture());
-            meshRenderer.sharedMaterial.SetTexture("_GradientTex", null);
+            meshRenderer.sharedMaterial.SetTexture("_GradientTex", dataset.GenerateVolume()); 
             meshRenderer.sharedMaterial.SetTexture("_NoiseTex", noiseTexture);
             meshRenderer.sharedMaterial.SetTexture("_TFTex", tfTexture);
 
             meshRenderer.sharedMaterial.EnableKeyword("MODE_DVR");
             meshRenderer.sharedMaterial.DisableKeyword("MODE_MIP");
             meshRenderer.sharedMaterial.DisableKeyword("MODE_SURF");
-
+        
             //if(dataset.scaleX != 0.0f && dataset.scaleY != 0.0f && dataset.scaleZ != 0.0f)
             //{
             //    float maxScale = Mathf.Max(dataset.scaleX, dataset.scaleY, dataset.scaleZ);

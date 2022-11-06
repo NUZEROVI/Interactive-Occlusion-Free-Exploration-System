@@ -14,8 +14,8 @@ namespace UnityVolumeRendering
         public string sliname;
         public int widgetNums = 0;
         public int sliNumOn;
-        MeshRenderer meshRenderer;
-        Material mat;
+        MeshRenderer meshRenderer, meshRenderer_Mask;
+        Material mat, mat_Mask;
 
         void Start()
         {
@@ -33,6 +33,13 @@ namespace UnityVolumeRendering
                 meshRenderer = objects[0].meshRenderer;
                 mat = meshRenderer.material;
             }
+
+            VolumeRenderedObject_Mask[] objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
+            if (objects_Mask.Length == 1)
+            {
+                meshRenderer_Mask = objects_Mask[0].meshRenderer;
+                mat_Mask = meshRenderer_Mask.material;
+            }
         }
 
         public void ValueChange(float v)
@@ -44,6 +51,7 @@ namespace UnityVolumeRendering
                 hover._CircleSize[sliNumOn] = v;
                 _CircleSize[sliNumOn] = v;
                 mat.SetFloatArray("_CircleSize", _CircleSize);
+                mat_Mask.SetFloatArray("_CircleSize", _CircleSize);
                 //mat.SetFloat("_cySize", v);
             }
 
@@ -55,6 +63,7 @@ namespace UnityVolumeRendering
                 hover._CircleSize[sliNumOn] = v;
                 _CircleSize[sliNumOn] = v;
                 mat.SetFloatArray("_CircleSize", _CircleSize);
+                mat_Mask.SetFloatArray("_CircleSize", _CircleSize);
             }
 
 

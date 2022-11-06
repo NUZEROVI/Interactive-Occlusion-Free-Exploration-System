@@ -15,7 +15,7 @@ namespace UnityVolumeRendering
         public float maxYRot = 60f;
         public float minYRot = -60f;
 
-        private Transform localTrans, tmpTrans;
+        private Transform localTrans, localMaskTrans;
 
         public Texture2D defaultTexture;
         public Texture2D exitTexture;
@@ -27,8 +27,8 @@ namespace UnityVolumeRendering
         public Matrix4x4[] camToWorld;
         public Vector4[] camPos;
 
-        MeshRenderer meshRenderer;
-        Material mat;
+        MeshRenderer meshRenderer, meshRenderer_Mask;
+        Material mat, mat_Mask;
 
         public float[] _CircleSize = new float[10];
         public float[] _LensIndexs = new float[10];
@@ -56,8 +56,15 @@ namespace UnityVolumeRendering
                 mat = meshRenderer.material;
             }
 
-            localTrans = GetComponent<Transform>();
-            tmpTrans = GetComponent<Transform>();
+            VolumeRenderedObject_Mask[] objects_Mask = FindObjectsOfType<VolumeRenderedObject_Mask>();
+            if (objects_Mask.Length == 1)
+            {
+                meshRenderer_Mask = objects_Mask[0].meshRenderer;
+                mat_Mask = meshRenderer_Mask.material;
+            }
+
+            localTrans = GetComponent<Transform>();            
+            localMaskTrans = objects_Mask[0].GetComponent<Transform>().GetChild(0).GetComponent<Transform>();
             myMainCam = Camera.main;
 
             camToWorld = new Matrix4x4[7];
@@ -91,6 +98,16 @@ namespace UnityVolumeRendering
             mat.EnableKeyword("MOUSEDOWN_ON");
             mat.SetFloat("_viewCamIndex", 2);
 
+            mat_Mask.SetMatrixArray("_CamToWorld", camToWorld);
+            mat_Mask.SetVectorArray("_camLocalPos", camPos);
+            mat_Mask.SetFloat("_localDepth", localDepth);
+            mat_Mask.SetFloat("_depthNP", depthNP);
+            mat_Mask.SetFloat("_maxDataVal", objects[0].dataset.GetMaxDataValue());
+            mat_Mask.EnableKeyword("MOUSEDOWN_ON");
+            mat_Mask.EnableKeyword("AllComponents");
+            mat_Mask.SetInt("_allcomponent_on", 0);
+            mat_Mask.SetFloat("_viewCamIndex", 2);
+
         }
         void Update()
         {
@@ -109,6 +126,7 @@ namespace UnityVolumeRendering
                     fullProgress -= FillSpeed * Time.deltaTime;
                     _CircleSize[_WidgetNums - 1] = fullProgress;
                     mat.SetFloatArray("_CircleSize", _CircleSize);
+                    mat_Mask.SetFloatArray("_CircleSize", _CircleSize);
                 }
             }
 
@@ -130,13 +148,19 @@ namespace UnityVolumeRendering
                 localTrans.rotation = Quaternion.AngleAxis(rotY, right) * localTrans.rotation;
             
                 localTrans.localScale = new Vector3(mat.GetFloat("ObjDepthX"), mat.GetFloat("ObjDepthY"), mat.GetFloat("ObjDepthZ"));
-                LimitRot();                
+                localMaskTrans.localScale = new Vector3(mat.GetFloat("ObjDepthX"), mat.GetFloat("ObjDepthY"), mat.GetFloat("ObjDepthZ"));
+                LimitRot();
+                LimitRot_Mask();
             }
             if (Input.GetMouseButtonUp(1))
             {
                 localTrans.localEulerAngles = new Vector3(0.0f, 0.0f, 0.0f);
                 localTrans.parent.localScale = new Vector3(mat.GetFloat("ObjDepthX"), mat.GetFloat("ObjDepthY"), mat.GetFloat("ObjDepthZ"));
-                localTrans.localScale = Vector3.one;     
+                localTrans.localScale = Vector3.one;
+
+                localMaskTrans.localEulerAngles = new Vector3(0.0f, 0.0f, 0.0f);
+                localMaskTrans.parent.localScale = new Vector3(mat_Mask.GetFloat("ObjDepthX"), mat_Mask.GetFloat("ObjDepthY"), mat_Mask.GetFloat("ObjDepthZ")) * 0.7f;                
+                localMaskTrans.localScale = Vector3.one;
             }
     
         }
@@ -174,7 +198,23 @@ namespace UnityVolumeRendering
             localTrans.localRotation = Quaternion.Euler(currentRotation);
             localTrans.parent.localScale = Vector3.one;
         }
-    
+
+        void LimitRot_Mask()
+        {
+            float minRotation = -60;
+            float maxRotation = 60;
+            Vector3 currentRotation = localTrans.localRotation.eulerAngles;
+            currentRotation.x = ConvertToAngle180(currentRotation.x);
+            currentRotation.x = Mathf.Clamp(currentRotation.x, minRotation, maxRotation);
+            currentRotation.y = ConvertToAngle180(currentRotation.y);
+            currentRotation.y = Mathf.Clamp(currentRotation.y, minRotation, maxRotation);
+            currentRotation.z = ConvertToAngle180(currentRotation.z);
+            currentRotation.z = Mathf.Clamp(currentRotation.z, minRotation, maxRotation);
+
+            localMaskTrans.localRotation = Quaternion.Euler(currentRotation);
+            localMaskTrans.parent.localScale = Vector3.one * 0.7f;
+        }
+
 
         void OnMouseDown()
         {
@@ -293,6 +333,24 @@ namespace UnityVolumeRendering
                 mat.SetMatrixArray("_RotateMatrixInverse", rotMatrixArrInverse);
                 mat.SetInt("_CurrentWidgetNum", _WidgetNums - 1);
 
+                mat_Mask.SetFloatArray("_CircleSize", _CircleSize);
+                mat_Mask.SetFloatArray("_LensIndexs", _LensIndexs);
+                mat_Mask.SetInt("_WidgetNums", _WidgetNums);
+                mat_Mask.SetInt("_RecordNums", _RecordNums);
+                mat_Mask.SetVectorArray("_WidgetPos", _WidgetPos);
+                mat_Mask.SetVectorArray("_WidgetRecorder", _WidgetRecorder);
+                mat_Mask.SetMatrixArray("_RotateMatrix", rotMatrixArr);
+                mat_Mask.SetMatrixArray("_RotateMatrixInverse", rotMatrixArrInverse);
+                mat_Mask.SetInt("_CurrentWidgetNum", _WidgetNums - 1);
+
+                if (mat_Mask.GetInt("_allcomponent_on") == 1)
+                {
+                    GameObject.Find("BtnState").GetComponent<Text>().text = (mat_Mask.GetInt("_CurrentWidgetNum")+1).ToString();
+                }
+                else if (mat_Mask.GetInt("_allcomponent_on") == 0)
+                {
+                    GameObject.Find("BtnState").GetComponent<Text>().text = "[ ALL ]";
+                }
                 //partialStop = true;
                 //_CircleSize[_WidgetNums - 1] = 0.1f;
                 //mat.SetFloatArray("_CircleSize", _CircleSize);
@@ -394,10 +452,30 @@ namespace UnityVolumeRendering
                 mat.SetMatrixArray("_RotateMatrixInverse", rotMatrixArrInverse);
                 mat.SetInt("_CurrentWidgetNum", _WidgetNums - 1);
 
+                mat_Mask.SetInt("_WidgetNums", _WidgetNums);
+                mat_Mask.SetInt("_RecordNums", _RecordNums);
+                mat_Mask.SetVectorArray("_WidgetPos", _WidgetPos);
+                mat_Mask.SetVectorArray("_WidgetRecorder", _WidgetRecorder);
+                mat_Mask.SetMatrixArray("_RotateMatrix", rotMatrixArr);
+                mat_Mask.SetMatrixArray("_RotateMatrixInverse", rotMatrixArrInverse);
+                mat_Mask.SetInt("_CurrentWidgetNum", _WidgetNums - 1);
+
+                if (mat_Mask.GetInt("_allcomponent_on") == 1)
+                {
+                    GameObject.Find("BtnState").GetComponent<Text>().text = (mat_Mask.GetInt("_CurrentWidgetNum") + 1).ToString();
+                }
+                else if (mat_Mask.GetInt("_allcomponent_on") == 0)
+                {
+                    GameObject.Find("BtnState").GetComponent<Text>().text = "[ ALL ]";
+                }
+
                 fullStop = true;            
                 _CircleSize[_WidgetNums - 1] = 0.0f;
                 mat.SetFloatArray("_CircleSize", _CircleSize);
                 mat.SetFloatArray("_LensIndexs", _LensIndexs);
+
+                mat_Mask.SetFloatArray("_CircleSize", _CircleSize);
+                mat_Mask.SetFloatArray("_LensIndexs", _LensIndexs);
             }
         }
       
