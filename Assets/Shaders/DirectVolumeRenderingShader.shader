@@ -271,7 +271,9 @@
             }
             float2 findIsoRange(float index)
             {
-                float2 val = _isoCluster[index] / _maxDataVal;
+                float2 val;
+                val.x = _isoCluster[index].x / _maxDataVal;
+                val.y = (_isoCluster[index].y + 1) / _maxDataVal;
                 return val;
             }
 
