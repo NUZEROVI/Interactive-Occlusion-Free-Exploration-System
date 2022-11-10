@@ -19,12 +19,12 @@ You can see more details on a branch called "Isosurface-Mesh-Non-Connected-Segme
 ### Material classfication (Isosurface Similarity &  Hierarchical Clustering)
 
 We were inspried by previous research from the paper "Isosurface similarity maps", which identify the most representative structures of material based on information theory.
-We implemented information theory to measure isosurface similarity map in `Scripts/VolumeObject/VolumeObjectFactory.cs`, by using the SeawispHunter.Maths, a C# library with Unity as Plugins  `Resources/Maths.dll` and `Resources/xunit.assert.dll` to compute entropy, conditional entropy, and mutual information.
+We implemented information theory to measure isosurface similarity map in `Scripts/VolumeObject/VolumeObjectFactory.cs`, by using the [`SeawispHunter.Maths`](https://github.com/shanecelis/SeawispHunter.Maths), a C# library with Unity as Plugins  `Resources/Maths.dll` and `Resources/xunit.assert.dll` to compute entropy, conditional entropy, and mutual information.
 
 In order to automatically identify ranges of iso-values that make up the major structure of the material, we next use a hierarchical clustering algorithm to cluster the isosurfaces of isovalues in `Scripts/PyCode_Clustering_Heapmap/Clustering.ipynb`.
 
 ### Non-connected Segmentation (Approximate Convex Meshes & Collider Detect)
-We segment the material structure into connected components by using the V-HACD library with Unity as Plugins `Resources/VHACD_DLL.dll` and `Resources/libvhacd.dll` to merge any triangle meshes as convex solutions. 
+We segment the material structure into connected components by using the [`V-HACD library`](https://github.com/kmammou/v-hacd) with Unity as Plugins `Resources/VHACD_DLL.dll` and `Resources/libvhacd.dll` to merge any triangle meshes as convex solutions. 
 
 Then, the approximate convex decomposition meshes that collide with each other are considered as connected structures and combined into the same piece.
 
@@ -32,7 +32,7 @@ Then, the approximate convex decomposition meshes that collide with each other a
 You can see more details regarding occlusion removal for interact on a branch called "VolumeVis".
 
 ### Obstruction Selection
-You can see `Shaders/SDF.cginc` for the lens placement is definition of Signed distance function(SDF) and `Shaders/DirectVolumeRenderingShader.shader` called that function to check `insideLens`, if true, we follow the priniple of WYSIWYG to design our obstruction selection function.
+You can see `Shaders/SDF.cginc` for the lens placement is definition of [`Signed distance function (SDF)`](https://iquilezles.org/articles/distfunctions/) and `Shaders/DirectVolumeRenderingShader.shader` called that function to check `insideLens`, if true, we follow the priniple of WYSIWYG to design our obstruction selection function.
 
 We utilize the paper "WYSIWYP: What You See Is What You Pick", a clssic visibility-oriented picking technique has to compute the first and second derivative of the accumulated opacity of the ray to determine the change in the maximum opacity value of the material to determine the selected material. Unlike them, we calculate each material structure's ray-accumulated opacity, visibility (*alpha*), to determine the most visible material.
 
