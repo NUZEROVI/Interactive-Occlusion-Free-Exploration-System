@@ -24,10 +24,8 @@
             {
                 CGPROGRAM
                 #pragma multi_compile __ MOUSEDOWN_ON
-                #pragma multi_compile __ DiggingWidget ErasingWidget      
-                #pragma multi_compile MODE_DVR MODE_MIP MODE_SURF
-                #pragma multi_compile __ TF2D_ON
-                #pragma multi_compile __ CUTOUT_PLANE CUTOUT_BOX_INCL CUTOUT_BOX_EXCL
+                #pragma multi_compile __ DiggingWidget ErasingWidget          
+                #pragma multi_compile __ TF2D_ON 
                 #pragma multi_compile __ LIGHTING_ON
                 #pragma multi_compile DEPTHWRITE_ON DEPTHWRITE_OFF
                 #pragma multi_compile __ DVR_BACKWARD_ON
@@ -41,8 +39,7 @@
                 #include "SDF.cginc"
 
                 #define MOUSEDOWN_ON DiggingWidget || ErasingWidget
-                #define CUTOUT_ON CUTOUT_PLANE || CUTOUT_BOX_INCL || CUTOUT_BOX_EXCL         
-
+               
                 struct vert_in
                 {
                     float4 vertex : POSITION;
@@ -98,10 +95,6 @@
                 int _isoCount;
                 float _isoRange[10];
                 float4 _isoCluster[10];
-
-    #if CUTOUT_ON
-                float4x4 _CrossSectionMatrix;
-    #endif
 
                 struct RayInfo
                 {
@@ -237,28 +230,7 @@
                     return clipPos.z / clipPos.w;
     #endif
                 }
-
-                bool IsCutout(float3 currPos)
-                {
-    #if CUTOUT_ON
-                    // Move the reference in the middle of the mesh, like the pivot
-                    float3 pos = currPos - float3(0.5f, 0.5f, 0.5f);
-
-                    // Convert from model space to plane's vector space
-                    float3 planeSpacePos = mul(_CrossSectionMatrix, float4(pos, 1.0f));
-
-        #if CUTOUT_PLANE
-                    return planeSpacePos.z > 0.0f;
-        #elif CUTOUT_BOX_INCL
-                    return !(planeSpacePos.x >= -0.5f && planeSpacePos.x <= 0.5f && planeSpacePos.y >= -0.5f && planeSpacePos.y <= 0.5f && planeSpacePos.z >= -0.5f && planeSpacePos.z <= 0.5f);
-        #elif CUTOUT_BOX_EXCL
-                    return planeSpacePos.x >= -0.5f && planeSpacePos.x <= 0.5f && planeSpacePos.y >= -0.5f && planeSpacePos.y <= 0.5f && planeSpacePos.z >= -0.5f && planeSpacePos.z <= 0.5f;
-        #endif
-    #else
-                    return false;
-    #endif
-                }
-
+              
                 int findClusterIndex(float density)
                 {
                     int clusterIndex = -1;
@@ -852,7 +824,7 @@
                 {
                     #define MAX_NUM_STEPS 512
                     #define OPACITY_THRESHOLD (1.0 - 1.0 / 255.0)
-
+                   
     #ifdef DVR_BACKWARD_ON
                     RayInfo ray = getRayBack2Front(i.vertexLocal, 0);
     #else
@@ -881,6 +853,8 @@
     #if DiggingWidget
                         float3 minDep = float3(0.0f, 0.0f, -2.0f), minDepY = float3(0.0f, 0.0f, -2.0f), minDepZ = float3(0.0f, 0.0f, -2.0f);
                         float3 maxDep = float3(1.0f, 1.0f, -2.0f), maxDepY = float3(1.0f, 1.0f, -2.0f), maxDepZ = float3(1.0f, 1.0f, -2.0f);
+                        float3 minDepTmp = float3(0.0f, 0.0f, -2.0f), minDepYTmp = float3(0.0f, 0.0f, -2.0f), minDepZTmp = float3(0.0f, 0.0f, -2.0f);
+                        float3 maxDepTmp = float3(1.0f, 1.0f, -2.0f), maxDepYTmp = float3(1.0f, 1.0f, -2.0f), maxDepZTmp = float3(1.0f, 1.0f, -2.0f);
                         int pIndex = -1;
                         float zDepth = 0.0f;
                         float zDepthInverse = 1.0f;
@@ -893,9 +867,7 @@
                         float dp = 0.0f;
                     
                         for (uint jStep = 0; jStep < _WidgetNums; jStep++) {
-                            if (_allcomponent_on == 1 && _CurrentWidgetNum != jStep) {
-                                continue;
-                            }
+                          
                             float3 r1 = float3(_WidgetPos[jStep].x, _WidgetPos[jStep].y, _WidgetPos[jStep].z);// -0.215 // _WidgetPos[jStep].z
                             float3 r2 = float3(_WidgetPos[jStep].x, _WidgetPos[jStep].y, _WidgetPos[jStep].z + (-(_WidgetPos[jStep].z)) * 2); // 0.215 //         
 
@@ -909,9 +881,13 @@
                             else if (_LensIndexs[jStep] == 0.3f) { // Vesica
                                 insideLens = sdVesica(currPos, float3(_WidgetPos[jStep].x, _WidgetPos[jStep].y, 0.0f), 0.5f, r2.z - r1.z, _CircleSize[jStep], _RotateMatrix[jStep]);
                             }
+                            
 
-                            if (insideLens) {
-
+                            if (insideLens) {    
+                                if (_allcomponent_on == 1 && _CurrentWidgetNum != jStep) {
+                                    continue;
+                                }
+                                
                                 float4 visData = float4(0.0f, 0.0f, -2.0f, 0.0f);
                                 float4 visDataInverse = float4(1.0f, 1.0f, -2.0f, 0.0f);
                                 if (_depthNP > 0) {
@@ -919,6 +895,7 @@
 
                                         for (uint dStep = 0; dStep < _WidgetRecorder[jStep].z; dStep++) {
                                             visData = F2B(_localDepth, getRayFront2Back(i.vertexLocal, 0), zDepthFX, zDepthFY, Findex, noiseVal);
+
                                             if (_WidgetPos[jStep].w == 1) {
                                                 minDep = visData;
                                             }
@@ -927,6 +904,11 @@
                                             }
                                             else if (_WidgetPos[jStep].w == 3) {
                                                 minDepZ = visData;
+                                            }
+                                            if (dStep == (_WidgetRecorder[jStep].z - 2) ) {
+                                                minDepTmp = visData;
+                                                minDepYTmp = visData;
+                                                minDepZTmp = visData;
                                             }
                                             zDepthFX = visData.x;
                                             zDepthFY = visData.y;
@@ -946,6 +928,11 @@
                                             }
                                             else if (_WidgetPos[jStep].w == 3) {
                                                 maxDepZ = visDataInverse;
+                                            }
+                                            if (dStep == (_WidgetRecorder[jStep].w - 2)) {
+                                                maxDepTmp = visDataInverse;
+                                                maxDepYTmp = visDataInverse;
+                                                maxDepZTmp = visDataInverse;
                                             }
                                             zDepthBX = visDataInverse.x;
                                             zDepthBY = visDataInverse.y;
@@ -967,6 +954,11 @@
                                             else if (_WidgetPos[jStep].w == 3) {
                                                 minDepZ = visData;
                                             }
+                                            if (dStep == (_WidgetRecorder[jStep].z - 2)) {
+                                                minDepTmp = visData;
+                                                minDepYTmp = visData;
+                                                minDepZTmp = visData;
+                                            }
                                             zDepthFX = visData.x;
                                             zDepthFY = visData.y;
                                             Findex = visData.z;
@@ -986,34 +978,35 @@
                                             else if (_WidgetPos[jStep].w == 3) {
                                                 maxDepZ = visDataInverse;
                                             }
+                                            if (dStep == (_WidgetRecorder[jStep].w - 2)) {
+                                                maxDepTmp = visDataInverse;
+                                                maxDepYTmp = visDataInverse;
+                                                maxDepZTmp = visDataInverse;
+                                            }
                                             zDepthBX = visDataInverse.x;
                                             zDepthBY = visDataInverse.y;
                                             Bindex = visDataInverse.z;
                                         }
                                     }
-                                }
+                                }                                
                             }
                         }
 
-                        if ((currPos.x <= minDep.x) || (currPos.x < 1.0f && pIndex == minDep.z)) {
-                            isMask = true;
+                        if (_allcomponent_on == 1) {
+                            if ((currPos.x > minDepTmp.x && currPos.x <= minDep.x) || (currPos.x < 1.0f && pIndex == minDep.z)) isMask = true;
+                            if ((((currPos.x < maxDepTmp.x && currPos.x >= maxDep.x)) || (currPos.x > 0.0f && pIndex == maxDep.z))) isMask = true;
+                            if ((currPos.y > minDepYTmp.x && currPos.y <= minDepY.x) || (currPos.y < 1.0f && pIndex == minDepY.z)) isMask = true;
+                            if ((((currPos.y < maxDepYTmp.x && currPos.y >= maxDepY.x)) || (currPos.y > 0.0f && pIndex == maxDepY.z))) isMask = true;
+                            if ((currPos.z > minDepZTmp.x && currPos.z <= minDepZ.x) || (currPos.z < 1.0f && pIndex == minDepZ.z)) isMask = true;
+                            if ((((currPos.z < maxDepZTmp.x && currPos.z >= maxDepZ.x)) || (currPos.z > 0.0f && pIndex == maxDepZ.z))) isMask = true;
                         }
-                        if ((((currPos.x >= maxDep.x)) || (currPos.x > 0.0f && pIndex == maxDep.z))) {
-                            isMask = true;
-                        }
-
-                        if ((currPos.y <= minDepY.x) || (currPos.y < 1.0f && pIndex == minDepY.z)) {
-                            isMask = true;
-                        }
-                        if ((((currPos.y >= maxDepY.x)) || (currPos.y > 0.0f && pIndex == maxDepY.z))) {
-                            isMask = true;
-                        }
-
-                        if ((currPos.z <= minDepZ.x) || (currPos.z < 1.0f && pIndex == minDepZ.z)) {
-                            isMask = true;
-                        }
-                        if ((((currPos.z >= maxDepZ.x)) || (currPos.z > 0.0f && pIndex == maxDepZ.z))) {
-                            isMask = true;
+                        else {
+                            if ((currPos.x <= minDep.x) || (currPos.x < 1.0f && pIndex == minDep.z)) isMask = true;
+                            if ((((currPos.x >= maxDep.x)) || (currPos.x > 0.0f && pIndex == maxDep.z))) isMask = true;
+                            if ((currPos.y <= minDepY.x) || (currPos.y < 1.0f && pIndex == minDepY.z)) isMask = true;
+                            if ((((currPos.y >= maxDepY.x)) || (currPos.y > 0.0f && pIndex == maxDepY.z))) isMask = true;
+                            if ((currPos.z <= minDepZ.x) || (currPos.z < 1.0f && pIndex == minDepZ.z)) isMask = true;
+                            if ((((currPos.z >= maxDepZ.x)) || (currPos.z > 0.0f && pIndex == maxDepZ.z))) isMask = true;
                         }
 
                         if (!(isMask)) {
@@ -1078,13 +1071,6 @@
 
     #endif
 
-
-                        // Perform slice culling (cross section plane)
-    #ifdef CUTOUT_ON
-                        if (IsCutout(currPos))
-                            continue;
-    #endif
-
                         // Get the dansity/sample value of the current position
                         const float density = getDensity(currPos);
 
@@ -1144,106 +1130,20 @@
     #endif
                     return output;
                 }
-                //
-                //            // Maximum Intensity Projection mode
-                //            frag_out frag_mip(frag_in i)
-                //            {
-                //                #define MAX_NUM_STEPS 512
-                //
-                //                RayInfo ray = getRayBack2Front(i.vertexLocal);
-                //                RaymarchInfo raymarchInfo = initRaymarch(ray, MAX_NUM_STEPS);
-                //
-                //                float maxDensity = 0.0f;
-                //                float3 maxDensityPos = ray.startPos;
-                //                for (int iStep = 0; iStep < raymarchInfo.numSteps; iStep++)
-                //                {
-                //                    const float t = iStep * raymarchInfo.numStepsRecip;
-                //                    const float3 currPos = lerp(ray.startPos, ray.endPos, t);
-                //                    
-                //#ifdef CUTOUT_ON
-                //                    if (IsCutout(currPos))
-                //                        continue;
-                //#endif
-                //
-                //                    const float density = getDensity(currPos);
-                //                    if (density > maxDensity && density > _MinVal && density < _MaxVal)
-                //                    {
-                //                        maxDensity = density;
-                //                        maxDensityPos = currPos;
-                //                    }
-                //                }
-                //
-                //                // Write fragment output
-                //                frag_out output;
-                //                output.colour = float4(1.0f, 1.0f, 1.0f, maxDensity); // maximum intensity
-                //#if DEPTHWRITE_ON
-                //                output.depth = localToDepth(maxDensityPos - float3(0.5f, 0.5f, 0.5f));
-                //#endif
-                //                return output;
-                //            }
 
-                //            // Surface rendering mode
-                //            // Draws the first point (closest to camera) with a density within the user-defined thresholds.
-                //            frag_out frag_surf(frag_in i)
-                //            {
-                //                #define MAX_NUM_STEPS 1024
-                //
-                //                RayInfo ray = getRayFront2Back(i.vertexLocal);
-                //                RaymarchInfo raymarchInfo = initRaymarch(ray, MAX_NUM_STEPS);
-                //
-                //                // Create a small random offset in order to remove artifacts
-                //                ray.startPos = ray.startPos + (2.0f * ray.direction * raymarchInfo.stepSize) * tex2D(_NoiseTex, float2(i.uv.x, i.uv.y)).r;
-                //
-                //                float4 col = float4(0,0,0,0);
-                //                for (int iStep = 0; iStep < raymarchInfo.numSteps; iStep++)
-                //                {
-                //                    const float t = iStep * raymarchInfo.numStepsRecip;
-                //                    const float3 currPos = lerp(ray.startPos, ray.endPos, t);
-                //                    
-                //#ifdef CUTOUT_ON
-                //                    if (IsCutout(currPos))
-                //                        continue;
-                //#endif
-                //
-                //                    const float density = getDensity(currPos);
-                //                    if (density > _MinVal && density < _MaxVal)
-                //                    {
-                //                        float3 normal = normalize(getGradient(currPos));
-                //                        col = getTF1DColour(density);
-                //                        col.rgb = calculateLighting(col.rgb, normal, -ray.direction, -ray.direction, 0.15);
-                //                        col.a = 1.0f;
-                //                        break;
-                //                    }
-                //                }
-                //
-                //                // Write fragment output
-                //                frag_out output;
-                //                output.colour = col;
-                //#if DEPTHWRITE_ON
-                //                
-                //                const float tDepth = iStep * raymarchInfo.numStepsRecip + (step(col.a, 0.0) * 1000.0); // Write large depth if no hit
-                //                output.depth = localToDepth(lerp(ray.startPos, ray.endPos, tDepth) - float3(0.5f, 0.5f, 0.5f));
-                //#endif
-                //                return output;
-                //            }
+                    frag_in vert(vert_in v)
+                    {
+                        return vert_main(v);
+                    }
 
-                            frag_in vert(vert_in v)
-                            {
-                                return vert_main(v);
-                            }
+                    frag_out frag(frag_in i)
+                    {
 
-                            frag_out frag(frag_in i)
-                            {
-                #if MODE_DVR
-                                return frag_dvr(i);
-                                //#elif MODE_MIP
-                                //                return frag_mip(i);
-                                //#elif MODE_SURF
-                                //                return frag_surf(i);
-                                #endif
-                                            }
+                        return frag_dvr(i);
 
-                                            ENDCG
-                                        }
+                    }
+
+                    ENDCG
+                }
         }
 }
