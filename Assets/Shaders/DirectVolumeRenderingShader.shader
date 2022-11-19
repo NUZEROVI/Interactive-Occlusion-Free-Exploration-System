@@ -24,9 +24,7 @@
             CGPROGRAM
             #pragma multi_compile __ MOUSEDOWN_ON
             #pragma multi_compile __ DiggingWidget ErasingWidget
-            #pragma multi_compile MODE_DVR MODE_MIP MODE_SURF
-            #pragma multi_compile __ TF2D_ON
-            #pragma multi_compile __ CUTOUT_PLANE CUTOUT_BOX_INCL CUTOUT_BOX_EXCL
+            #pragma multi_compile __ TF2D_ON            
             #pragma multi_compile __ LIGHTING_ON
             #pragma multi_compile DEPTHWRITE_ON DEPTHWRITE_OFF
             #pragma multi_compile __ DVR_BACKWARD_ON
@@ -40,8 +38,7 @@
             #include "UnityCG.cginc"
             #include "SDF.cginc"
 
-            #define MOUSEDOWN_ON DiggingWidget || ErasingWidget
-            #define CUTOUT_ON CUTOUT_PLANE || CUTOUT_BOX_INCL || CUTOUT_BOX_EXCL
+            #define MOUSEDOWN_ON DiggingWidget || ErasingWidget            
 
             struct vert_in
             {
@@ -96,10 +93,6 @@
             int _isoCount;
             float _isoRange[10];
             float4 _isoCluster[10];
-
-#if CUTOUT_ON
-            float4x4 _CrossSectionMatrix;
-#endif
 
             struct RayInfo
             {
@@ -234,28 +227,7 @@
 #else
                 return clipPos.z / clipPos.w;
 #endif
-            }
-
-            bool IsCutout(float3 currPos)
-            {
-#if CUTOUT_ON
-                // Move the reference in the middle of the mesh, like the pivot
-                float3 pos = currPos - float3(0.5f, 0.5f, 0.5f);
-
-                // Convert from model space to plane's vector space
-                float3 planeSpacePos = mul(_CrossSectionMatrix, float4(pos, 1.0f));
-                
-    #if CUTOUT_PLANE
-                return planeSpacePos.z > 0.0f;
-    #elif CUTOUT_BOX_INCL
-                return !(planeSpacePos.x >= -0.5f && planeSpacePos.x <= 0.5f && planeSpacePos.y >= -0.5f && planeSpacePos.y <= 0.5f && planeSpacePos.z >= -0.5f && planeSpacePos.z <= 0.5f);
-    #elif CUTOUT_BOX_EXCL
-                return planeSpacePos.x >= -0.5f && planeSpacePos.x <= 0.5f && planeSpacePos.y >= -0.5f && planeSpacePos.y <= 0.5f && planeSpacePos.z >= -0.5f && planeSpacePos.z <= 0.5f;
-    #endif
-#else
-                return false;
-#endif
-            }
+            }           
 
             int findClusterIndex(float density)
             {
@@ -1075,12 +1047,6 @@
 
 #endif
 
-                    // Perform slice culling (cross section plane)
-#ifdef CUTOUT_ON
-                    if(IsCutout(currPos))
-                    	continue;
-#endif
-
                     // Get the dansity/sample value of the current position
                     const float density = getDensity(currPos);
 
@@ -1140,88 +1106,6 @@
 #endif
                 return output;
             }
-//
-//            // Maximum Intensity Projection mode
-//            frag_out frag_mip(frag_in i)
-//            {
-//                #define MAX_NUM_STEPS 512
-//
-//                RayInfo ray = getRayBack2Front(i.vertexLocal);
-//                RaymarchInfo raymarchInfo = initRaymarch(ray, MAX_NUM_STEPS);
-//
-//                float maxDensity = 0.0f;
-//                float3 maxDensityPos = ray.startPos;
-//                for (int iStep = 0; iStep < raymarchInfo.numSteps; iStep++)
-//                {
-//                    const float t = iStep * raymarchInfo.numStepsRecip;
-//                    const float3 currPos = lerp(ray.startPos, ray.endPos, t);
-//                    
-//#ifdef CUTOUT_ON
-//                    if (IsCutout(currPos))
-//                        continue;
-//#endif
-//
-//                    const float density = getDensity(currPos);
-//                    if (density > maxDensity && density > _MinVal && density < _MaxVal)
-//                    {
-//                        maxDensity = density;
-//                        maxDensityPos = currPos;
-//                    }
-//                }
-//
-//                // Write fragment output
-//                frag_out output;
-//                output.colour = float4(1.0f, 1.0f, 1.0f, maxDensity); // maximum intensity
-//#if DEPTHWRITE_ON
-//                output.depth = localToDepth(maxDensityPos - float3(0.5f, 0.5f, 0.5f));
-//#endif
-//                return output;
-//            }
-
-//            // Surface rendering mode
-//            // Draws the first point (closest to camera) with a density within the user-defined thresholds.
-//            frag_out frag_surf(frag_in i)
-//            {
-//                #define MAX_NUM_STEPS 1024
-//
-//                RayInfo ray = getRayFront2Back(i.vertexLocal);
-//                RaymarchInfo raymarchInfo = initRaymarch(ray, MAX_NUM_STEPS);
-//
-//                // Create a small random offset in order to remove artifacts
-//                ray.startPos = ray.startPos + (2.0f * ray.direction * raymarchInfo.stepSize) * tex2D(_NoiseTex, float2(i.uv.x, i.uv.y)).r;
-//
-//                float4 col = float4(0,0,0,0);
-//                for (int iStep = 0; iStep < raymarchInfo.numSteps; iStep++)
-//                {
-//                    const float t = iStep * raymarchInfo.numStepsRecip;
-//                    const float3 currPos = lerp(ray.startPos, ray.endPos, t);
-//                    
-//#ifdef CUTOUT_ON
-//                    if (IsCutout(currPos))
-//                        continue;
-//#endif
-//
-//                    const float density = getDensity(currPos);
-//                    if (density > _MinVal && density < _MaxVal)
-//                    {
-//                        float3 normal = normalize(getGradient(currPos));
-//                        col = getTF1DColour(density);
-//                        col.rgb = calculateLighting(col.rgb, normal, -ray.direction, -ray.direction, 0.15);
-//                        col.a = 1.0f;
-//                        break;
-//                    }
-//                }
-//
-//                // Write fragment output
-//                frag_out output;
-//                output.colour = col;
-//#if DEPTHWRITE_ON
-//                
-//                const float tDepth = iStep * raymarchInfo.numStepsRecip + (step(col.a, 0.0) * 1000.0); // Write large depth if no hit
-//                output.depth = localToDepth(lerp(ray.startPos, ray.endPos, tDepth) - float3(0.5f, 0.5f, 0.5f));
-//#endif
-//                return output;
-//            }
 
             frag_in vert(vert_in v)
             {
@@ -1230,13 +1114,7 @@
 
             frag_out frag(frag_in i)
             {
-#if MODE_DVR
                 return frag_dvr(i);
-//#elif MODE_MIP
-//                return frag_mip(i);
-//#elif MODE_SURF
-//                return frag_surf(i);
-#endif
             }
 
             ENDCG
