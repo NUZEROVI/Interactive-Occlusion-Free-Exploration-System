@@ -1,5 +1,3 @@
-# Interactive Occlusion-Free System for Volume Exploration ([paper](http://doi.org/10.6345/NTNU202201788))
-
 
 ## **Introduction**
    
