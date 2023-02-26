@@ -1,10 +1,14 @@
 # Interactive Occlusion-Free System for Volume Exploration ([paper](http://doi.org/10.6345/NTNU202201788))
 
-|<img src="https://github.com/NUZEROVI/Interactive_Occlusion_Free_Exploration_System/blob/VolumeVis/Screenshots/Interface.png" width="100%" > | <img src="https://github.com/NUZEROVI/Interactive_Occlusion_Free_Exploration_System/blob/VolumeVis/Screenshots/Algo_overview2.png" width="85%">|
-|--------|--------|
+
+## **Introduction**
    
-## **System Downloads** ([Releases](https://github.com/NUZEROVI/Interactive-Occlusion-Free-Exploration-System/releases/tag/VolumVis_v1.0.0)) ([for Mac](https://github.com/NUZEROVI/Interactive-Occlusion-Free-Exploration-System/releases/download/VolumVis_v1.0.0/VolumeVis_Program_MacOS_Installer.dmg)) ([for Windows](https://github.com/NUZEROVI/Interactive-Occlusion-Free-Exploration-System/releases/download/VolumVis_v1.0.0/Occlusion-Free.VolumeVis_Program_Win_x86_64.zip)) 
-<p align="center"><img src="https://github.com/NUZEROVI/Interactive_Occlusion_Free_Exploration_System/blob/VolumeVis/Screenshots/program_v1.png"></p>
+#### **System Downloads** ([Releases](https://github.com/NUZEROVI/Interactive-Occlusion-Free-Exploration-System/releases/tag/VolumVis_v1.0.0)) ([for Mac](https://github.com/NUZEROVI/Interactive-Occlusion-Free-Exploration-System/releases/download/VolumVis_v1.0.0/VolumeVis_Program_MacOS_Installer.dmg)) ([for Windows](https://github.com/NUZEROVI/Interactive-Occlusion-Free-Exploration-System/releases/download/VolumVis_v1.0.0/Occlusion-Free.VolumeVis_Program_Win_x86_64.zip)) 
+
+ [![Watch the video](https://github.com/NUZEROVI/Interactive-Occlusion-Free-System-for-Accessible-Volume-Exploration/blob/VolumeVis/Screenshots/Video%20Cover.png)](https://youtu.be/PfOvNkHc_xI)
+
+
+
 
 ## **Algorithm Overview (step-by-step)**
 #### The project can be divided into three stages :
